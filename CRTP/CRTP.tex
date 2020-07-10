@@ -1,5 +1,7 @@
 \documentclass{article}
 
+\usepackage{amsmath}
+
 \title{The Restricted Three-Body Problem}
 \author{Armando Herrera}
 
@@ -23,8 +25,13 @@ Newton's second law of motion describe the relationship between force and accele
 
 Now, there are categories of forces, Contact Forces and Action-at-a-Distance Forces. The differentiating factor between the two categories is that the Contact Forces, as the name implies, requires two object's contact and Action-at-a-Distance Forces are applied, again as the name implies, at a distance. In the vacuum of space the main force active is the Force of Gravity.
 
-The force of gravity, and most Action-at-a-Distance Forces, exist by the inverse-square law, where it's amount is inversely proportional to the distance from the source of the force, here gravity. $$F\propto \frac{1}{r^2}$$ In 1687 Newton in Newton's Principia postulated what is now called Newton's Law of Universal Gravitation \cite{rohrlich_1999}. $$F=G\frac{m_1m_2}{r^2}$$
+The force of gravity, and most Action-at-a-Distance Forces, exist by the inverse-square law, where it's amount is inversely proportional to the distance from the source of the force, here gravity. $$F\propto \frac{1}{r^2}$$ In 1687 Newton in Newton's Principia postulated what is now called Newton's Law of Universal Gravitation \cite{rohrlich_1999}. $$F_{12}=G\frac{m_1m_2}{r^2}$$
 
-Newton's Law of Universal Gravitation gives us the key to the story between objects in the vacuum of space. 
+Newton's Law of Universal Gravitation gives us the key to the story between objects in the vacuum of space. For instance, if we have $n$ objects, the force on object 1 is $$F_1=\sum_{i=2}^n{G\frac{m_1 m_i}{r_{1i}^2}}$$ and, as we see for the calculation for object 1, the computational complexity for a single object is $O(n)$ and therefore to calculate the force on all $n$ objects the complexity is $O(n^2)$. Using these force along with Newton's second law the velocity and position can then be calculated.
+\begin{align*}
+	\vec{v} &= \vec{v}_0+\vec{a}t\\
+	\vec{r} &= \vec{r}_0+\bigg(\frac{\vec{v}+\vec{v}_0}{2}\bigg)t
+\end{align*}
+Now, this is enough information to simulate the restricted 3-body system but it is not enough to calculate initial orbit velocities, orbit characteristics, or most optimal trajectory.
 
 \end{document}
