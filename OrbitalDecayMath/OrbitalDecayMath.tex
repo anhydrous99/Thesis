@@ -5,13 +5,13 @@
 \usepackage{graphicx}
 \graphicspath{{images/}}
 
-\title{The Restricted Three-Body Problem}
+\title{Mathematical Description of Orbital Decay}
 \author{Armando Herrera}
 
 \begin{document}
 \maketitle
 
-Here I strive to describe the mechanics of the three-body problem. In order to go over the three-body problem, we must first go over the underlying physics, describe the simpler single body problem, two body problems, the three body problem, and finally the restricted three-body problems.
+Here I strive to describe the mechanics of orbital decay.
 
 \section{Classical Mechanics}
 
@@ -58,13 +58,6 @@ v=\sqrt{\frac{GM}{r}}
 
 For a non-circular orbit like Elliptical orbits or Parabolic orbits conic sections can be used. Conic sections care the lines where a plane intersects a two napped cone.
 
-\section{Hamiltonian Mechanics}
-
-As complexity is added to a system, calculations done through Newton's formulations become increasingly complex, like in our restricted three body problem. In Hamiltonian Mechanics there are what are called Hamilton's equations. 
-\begin{align}
-\frac{d\vec{p}}{dt}&=-\frac{\partial \mathcal{H}}{\partial \vec{r}}\\
-\frac{d\vec{r}}{dt}&=\frac{\partial \mathcal{H}}{\partial \vec{p}}
-\end{align}
-Where the hamiltonian, $\mathcal{H}=T+U$, where $T$ is the kinetic energy and $U$ is the potential energy and $p$ is the momentum. 
+One of the highest effects on satellites less than 500 km away from earth is the effect of draw, it is defined as $$F_D=\frac{1}{2}\rho v^2 C_d A$$ where $A$ is the surface area normal to the direction of motion, $\rho$ is the density, $v$ is the speed, and $C_D$ is the drag coefficient.
 
 \end{document}
