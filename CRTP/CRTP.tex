@@ -25,17 +25,36 @@ Newton's second law of motion describe the relationship between force and accele
 
 Now, there are categories of forces, Contact Forces and Action-at-a-Distance Forces. The differentiating factor between the two categories is that the Contact Forces, as the name implies, requires two object's contact and Action-at-a-Distance Forces are applied, again as the name implies, at a distance. In the vacuum of space the main force active is the Force of Gravity.
 
-The force of gravity, and most Action-at-a-Distance Forces, exist by the inverse-square law, where it's amount is inversely proportional to the distance from the source of the force, here gravity. $$F\propto \frac{1}{r^2}$$ In 1687 Newton in Newton's Principia postulated what is now called Newton's Law of Universal Gravitation \cite{rohrlich_1999}. $$F_{12}=G\frac{m_1m_2}{r^2}$$
+The force of gravity, and most Action-at-a-Distance Forces, exist by the inverse-square law, where it's amount is inversely proportional to the distance from the source of the force, here gravity. $$F\propto \frac{1}{r^2}$$ In 1687 Newton in Newton's Principia postulated what is now called Newton's Law of Universal Gravitation \cite{rohrlich_1999}. $$F_{21}=-G\frac{m_1m_2}{r^2}$$ or in vector notation 
+\begin{equation}
+\vec{F}_{21}=-G\frac{m_1m_2}{|\vec{r}_{12}|^2}\hat{r}_{12}
+\end{equation}
+ where $\hat{r}$ is the unit vector of $r$.
 
 Newton's Law of Universal Gravitation gives us the key to the story between objects in the vacuum of space. For instance, if we have $n$ objects, the force on object 1 is $$F_1=\sum_{i=2}^n{G\frac{m_1 m_i}{r_{1i}^2}}$$ and, as we see for the calculation for object 1, the computational complexity for a single object is $O(n)$ and therefore to calculate the force on all $n$ objects the complexity is $O(n^2)$. Using these force along with Newton's second law the velocity and position can then be calculated.
-\begin{align*}
+\begin{align}
 	\vec{v} &= \vec{v}_0+\vec{a}t\\
 	\vec{r} &= \vec{r}_0+\bigg(\frac{\vec{v}+\vec{v}_0}{2}\bigg)t
-\end{align*}
+\end{align}
 Now, this is enough information to simulate the restricted 3-body system but it is not enough to calculate initial orbit velocities, orbit characteristics, or most optimal trajectory. In fact for large $n$ relying on this law is practically impossible due to the quadratic complexity. Hence, we can use numerical integration to approximate Newton's laws.
 
-Firstly, forgo 
+Firstly, a more useful representation is that of potential energy. Gravity is a conservative force, meaning that any work done to move an object that is under the influence of gravity isn't path dependent. $$\nabla\times \vec{F}=\vec{0}$$ 
+So the potential energy can be calculated by $$U=-\int_C \vec{F}\cdot d\vec{r}.$$ After plugging in $\vec{F}$ and solving the integral we get the gravitational potential energy.
+\begin{equation}
+U=-G\frac{m_1m_2}{r}
+\end{equation}
+Another way to represent this is by the gravitational acceleration. 
+\begin{equation}
+\vec{a}=\frac{GM}{r^2}\hat{r}
+\end{equation}
 
-\section{Kepler's Laws}
+\section{Orbital Mechanics}
+
+If an object is in orbit around another object and said orbit i circular then we can set the centrifugal acceleration equal to the acceleration due to gravity, $$\frac{v^2}{r}=\frac{GM}{r^2}$$, then solve for velocity.
+\begin{equation}
+v=\sqrt{\frac{GM}{r}}
+\end{equation}
+
+For a non-circular orbit like Elliptical orbits or Parabolic orbits 
 
 \end{document}
