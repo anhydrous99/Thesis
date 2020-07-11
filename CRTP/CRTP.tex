@@ -65,33 +65,6 @@ As complexity is added to a system, calculations done through Newton's formulati
 \frac{d\vec{p}}{dt}&=-\frac{\partial \mathcal{H}}{\partial \vec{r}}\\
 \frac{d\vec{r}}{dt}&=\frac{\partial \mathcal{H}}{\partial \vec{p}}
 \end{align}
-Where the hamiltonian, $\mathcal{H}=T+U$, where $T$ is the kinetic energy and $U$ is the potential energy and $p$ is the momentum.
-
-For the two body problem, we can use Hamiltonian Mechanics to analytically express it. $T$ as the kinetic energy, $T=\frac{1}{2}mv^2$, and $U$ the previously calculated gravitational potential energy, equation \ref{eq:gravpotential}. Therefore the Hamiltonian of the system would be $$\mathcal{H}=\frac{1}{2}m_1 v^2-G\frac{m_1 m_2}{r}.$$ Here I am assuming a body is exceptionally larger than the other, $m_2>>m_1$, like in the instance of a space shuttle and the earth. The hamiltonian can be put in terms of the momentum, $p=mv$. 
-$$\mathcal{H}=\frac{p_1^2}{2m_1}-G\frac{m_1 m_2}{r}$$
-And the solutions would be
-\begin{align*}
-\frac{\partial \mathcal{H}}{\partial r}&=G\frac{m_1 m_2}{r^2}=F=-\dot{p}\\
-\frac{\partial \mathcal{H}}{\partial p}&=\frac{p_1}{m_1}=v_1=\dot{r}
-\end{align*}
-Notice how the equation for the force of gravity and the velocity was shown.
-
-Now, the restricted three body system, similar to the three body system, where three bodies exist in the system. They differ in that one of the bodies is massive compared to the other two, $m_1>>m_2$ and $m_1>>m_3$, the mass of the third object is smaller than the other two, $m_2>>m_3$, the reference frame's origin is at the center of the massive object, $m_1$, lettings us make some simplifications. The kinetic energy of both bodies, which is the total kinetic energy of the system, is 
-$$T=\frac{1}{2}(m_2\vec{v}_2^2+m_3\vec{v}_3^2)$$ and the sum of the gravitation energies of the two bodies 
-$$U=-G\frac{m_1}{|\vec{r}_1|^2}-G\frac{m_2}{|\vec{r}_2-\vec{r_1}|^2}$$
-\begin{figure}
-\includegraphics[width=0.85\textwidth]{gravpoten}
-\centering
-\caption{Plot of the gravitational potential energy between the earth and the moon where distance from the earth and the moon is scaled to 4.}\label{fig:gravpot}
-\end{figure}
- Where $r_1$ is the distance from the origin and $r_2$ is the distance from the origin of the second object. A plot of this is shown in Figure~\ref{fig:gravpot}.
-Together the hamiltonian is $$\mathcal{H}=\frac{1}{2}(m_2\vec{v}_2^2+m_3\vec{v}_3^2)-G\bigg(\frac{m_1}{|\vec{r}_1|^2}+\frac{m_2}{|\vec{r_2}-\vec{r_1}|^2}\bigg)$$
-and if we figure out the momentum of both objects
-$$\mathcal{H}=\frac{1}{2}\bigg(\frac{\vec{p}_2^2}{m_2}+\frac{\vec{p}_3^2}{m_3}\bigg)-G\bigg(\frac{m_1}{|\vec{r}_1|^2}+\frac{m_2}{|\vec{r_2}-\vec{r_1}|^2}\bigg).$$ In this case, we can set $r_2$ as constant and evaluate the partial derivative.
-\begin{align*}
-\dot{p}_3&=G\frac{\partial}{\partial \vec{r}}\bigg(\frac{m_1}{|\vec{r}_1|^2}+\frac{m_2}{|\vec{r_2}-\vec{r_1}|^2}\bigg)\\
-\dot{p}_3&=G\bigg(\frac{2m_1}{|\vec{r}_1|^3}+\bigg)\\
-\dot{r}_3&=\frac{1}{2}\frac{\partial}{\partial \vec{p}}\bigg(\frac{\vec{p}_2^2}{m_2}+\frac{\vec{p}_3^2}{m_3}\bigg)
-\end{align*}
+Where the hamiltonian, $\mathcal{H}=T+U$, where $T$ is the kinetic energy and $U$ is the potential energy and $p$ is the momentum. 
 
 \end{document}
