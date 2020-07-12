@@ -2,8 +2,10 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{graphicx}
-\graphicspath{{images/}}
+\usepackage{xcolor}
+\usepackage[ruled,vlined]{algorithm2e}
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+\SetCommentSty{mycommfont}
 
 \title{Mathematical Description of Orbital Decay}
 \author{Armando Herrera}
@@ -24,7 +26,10 @@ Here I denote $\vec{r}$ to be the position of the object and $\vec{v}$ to be the
 Similarly, the acceleration of an object can be defined as the rate of change of velocity of said object or the rate of change of the rate of change of the object's position. $$\vec{a}=\dot{\vec{v}}=\ddot{\vec{r}}$$ 
 Here I use $a$ to the acceleration and $\ddot{}$ as the second derivative, $\frac{d^2}{dt^2}$.
 
-Newton's second law of motion describe the relationship between force and acceleration, showing that the net force $F$ applied to an object is equal to the mass $m$ multiplied by the acceleration. $$\vec{F}=m\vec{a}$$
+Newton's second law of motion describe the relationship between force and acceleration, showing that the net force $F$ applied to an object is equal to the mass $m$ multiplied by the acceleration. 
+\begin{equation}\label{eq:newton}
+\vec{F}=m\vec{a}
+\end{equation}
 
 Now, there are categories of forces, Contact Forces and Action-at-a-Distance Forces. The differentiating factor between the two categories is that the Contact Forces, as the name implies, requires two object's contact and Action-at-a-Distance Forces are applied, again as the name implies, at a distance. In the vacuum of space the main force active is the Force of Gravity.
 
@@ -36,8 +41,8 @@ The force of gravity, and most Action-at-a-Distance Forces, exist by the inverse
 
 Newton's Law of Universal Gravitation gives us the key to the story between objects in the vacuum of space. For instance, if we have $n$ objects, the force on object 1 is $$F_1=\sum_{i=2}^n{G\frac{m_1 m_i}{r_{1i}^2}}$$ and, as we see for the calculation for object 1, the computational complexity for a single object is $O(n)$ and therefore to calculate the force on all $n$ objects the complexity is $O(n^2)$. Using these force along with Newton's second law the velocity and position can then be calculated.
 \begin{align}
-	\vec{v} &= \vec{v}_0+\vec{a}t\\
-	\vec{r} &= \vec{r}_0+\bigg(\frac{\vec{v}+\vec{v}_0}{2}\bigg)t
+	\vec{v} &= \vec{v}_0+\vec{a}t \label{eq:vel}\\
+	\vec{r} &= \vec{r}_0+\vec{v}_0 t+\frac{1}{2}\vec{a}t^2\label{eq:pos}
 \end{align}
 Now, this is enough information to simulate the restricted 3-body system but it is not enough to calculate initial orbit velocities, orbit characteristics, or most optimal trajectory. In fact for large $n$ relying on this law is practically impossible due to the quadratic complexity. Hence, we can use numerical integration to approximate Newton's laws.
 
@@ -58,6 +63,61 @@ v=\sqrt{\frac{GM}{r}}
 
 For a non-circular orbit like Elliptical orbits or Parabolic orbits conic sections can be used. Conic sections care the lines where a plane intersects a two napped cone.
 
-One of the highest effects on satellites less than 500 km away from earth is the effect of draw, it is defined as $$F_D=\frac{1}{2}\rho v^2 C_d A$$ where $A$ is the surface area normal to the direction of motion, $\rho$ is the density, $v$ is the speed, and $C_D$ is the drag coefficient.
+\section{Drag Force}
+
+One of the highest effects on satellites less than 500 km away from earth is the effect of draw, it is defined as $$F_D=\frac{1}{2}\rho v^2 C_d A$$ where $A$ is the surface area normal to the direction of motion, $\rho$ is the density, $v$ is the speed, and $C_d$ is the drag coefficient. According to Moe, Moe, and Wallace 1998, the drag coefficient of a spherical satellite at around $Z=200km$ and temperature $T=850K$ is about 2.123 \cite{moe_moe_wallace_1998}. This gives us a starting point, but as is said in Pardini \& Anselmo 2001, the drag coefficient is extrapolated from orbital decay observations as I intend to do here \cite{pardini_anselmo_2001}. Now, while the area normal to the direction of velocity can change we can make the initial estimation while the empirical extrapolation of the drag coefficient can be tweaked to overtake this error. Of course, the force of drag will be completely opposite to the direction of velocity.
+
+The comparison of thermospheric density, (Pardini \& Anselmo, 2001), concluded that below 400 km the models MSIS-86 and MSISE-90 may be considered the best but TD-88 performed at 10\% accuracy when in low solar activity \cite{pardini_anselmo_2001}. An approximation with comparable results is dubbed as the NASA model \cite{brito_celestino_moraes_2015}\cite{nasa}.
+\begin{equation}
+\rho=\frac{P}{0.2869(T+27301)}
+\end{equation} where $$T=-131.21+0.00299r$$ and $$P=2.488\bigg(\frac{T+273.1}{216.6}\bigg)^{-11.388}.$$
+We can reformulate the equation as 
+\begin{equation}
+\rho=\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31})(141.89+0.00299r)^{11.388}}.
+\end{equation}
+
+\section{Equations of Motion}
+
+If we use a starting circular orbit, then the initial velocity would be $v_0=\sqrt{\frac{GM}{r}}$, random initial position 300 km from the surface of earth, starting mass of 100 kg, and surface area, $A$, of 1 $\text{m}^2$, we can start to formulate our equations of motion. Satellites now, tend to use low-thrust electric engines due to their fuel efficiency, so a force of $F=0.20$N, specific impulse of $I_s=2000$sec, and propellant mass of 75 kg. A useful quantity to keep track of is the propellant flow, 
+\begin{equation}
+\dot{m}=\frac{F}{I_sg}
+\end{equation}
+, where $F$ is said force, $I_s$ is said specific impulse, and $g$ is the gravitational acceleration at 300 km from the surface, $8.958\frac{m}{s^2}$, so $\dot{m}=1.11632\times 10^{-5}\frac{kg}{\text{sec}}$ \cite{sutton_biblarz_2017}.
+
+To put everything together, let's start building our equations of motion and finally our algorithm for the problem. We start by calculating the net force on our satellite, which is the sum of all forces on the satellite. 
+\begin{equation}
+\vec{F}=-G\frac{m_e m}{|\vec{r}|^2}\hat{r}-\frac{1}{2}\rho v^2 C_d A\hat{v}
+\end{equation}
+After calculating the resulting acceleration vector using equation~\ref{eq:newton}, calculate the next time step's velocity and position using equation~\ref{eq:vel} and equation~\ref{eq:pos}. This results in Algorithm~\ref{alg:problemsim}.
+
+\begin{algorithm}
+	\SetAlgoLined
+	\DontPrintSemicolon
+	\KwResult{System State after $n$ steps}
+	\tcc{Calculate initial conditions}
+	$\theta\leftarrow$ random number between $0$ and $2\pi$\;
+	$\vec{r}\leftarrow$ 300 km from the surface of earth, $\theta$ angle from x-axis\;
+	$\vec{v}\leftarrow \sqrt{\frac{GM}{r}}(\cos(\theta+\frac{\pi}{2})\hat{i}+\sin(\theta+\frac{\pi}{2})\hat{j})$ \;
+	$m\leftarrow m_p+m_l$ mass of satellite\;
+	$m_e\leftarrow$ mass of earth \;
+	$dt\leftarrow 1$ time delta per step in seconds \;
+	$G\leftarrow$ gravitational constant \;
+	$C_d\leftarrow$ 2.123 \;
+	$A\leftarrow1$ surface area normal to the velocity\;
+	\tcc{Iterate for n-steps}
+	\For{$n$ steps}{
+		$\rho\leftarrow\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31})(141.89+0.00299r)^{11.388}}$ \;
+		$\vec{F}\leftarrow-G\frac{m_e m}{|\vec{r}|^2}\hat{r}-\frac{1}{2}\rho v^2 C_d A\hat{v}$ \;
+		$\vec{a}\leftarrow\frac{\vec{F}}{m}$ \;
+		$\vec{r}\leftarrow\vec{r}+\vec{v} t+\frac{1}{2}\vec{a}dt^2$ \;
+		$\vec{v}\leftarrow\vec{v}+\vec{a}dt$
+	}
+	\caption{Problem Simulation - No Propulsion}\label{alg:problemsim}
+\end{algorithm}
+
+\newpage
+
+\bibliographystyle{acm}
+\bibliography{References}
 
 \end{document}
