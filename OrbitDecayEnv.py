@@ -1,4 +1,6 @@
+from stable_baselines.common.policies import MlpPolicy
 from gym.wrappers.time_limit import TimeLimit
+from stable_baselines import PPO2
 from gym.utils import seeding
 from gym import spaces
 import numpy as np
@@ -22,11 +24,13 @@ class OrbitDecayEnv(gym.Env):
         self.A = 1                # Surface area normal to velocity
         self.F_t = 0.2            # Force of thrust
         self.steps = 1000
+        self.orbit_v = None
         # Some state vectors
         self.r = np.zeros(2)
         self.v = np.zeros(2)
-        high = np.array([1], dtype=np.float32)
+        high = np.array([1, 1, 1, 1, 10], dtype=np.float32)
         low = -high
+        low[4] = 0
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.viewer = None
@@ -42,35 +46,49 @@ class OrbitDecayEnv(gym.Env):
             self.r_s,
             0
         ])
-        v = np.sqrt(self.GM / self.r_s)
+        self.orbit_v = np.sqrt(self.GM / self.r_s)
         self.v = np.array([
             0,
-            v
+            self.orbit_v
         ])
         return np.concatenate((self.r, self.v, np.zeros(1)))
 
     def step(self, action):
         assert self.action_space.contains(action)
         dt = self.dt / self.steps
+        thrust = action[0]
+        angle = action[1] * np.pi
         for _ in range(self.steps):
-            a = self._acceleration(self.r, self.v)
+            a = self._acceleration(self.r, self.v, thrust, angle)
             self.r += self.v * dt + 0.5 * a * dt ** 2
             self.v += a * dt
         h = np.linalg.norm(self.r) - self.r_e
-        hd = self.h - h
-        return np.concatenate((self.r, self.v, [hd]))
+        hd = np.abs(self.h - h)  # Distance from intended height
+        # Create output state and scale to between -1 and 1
+        state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd]))
 
-    def _acceleration(self, r_input, v_input):
+        reward = 1.0
+        done = False
+        if hd > 10:
+            reward = 0.0
+            done = True
+
+        return state, reward, done, {}
+
+    def _acceleration(self, r_input, v_input, thrust, angle):
         r2 = np.dot(r_input, r_input)
         r = np.sqrt(r2)
         v2 = np.dot(v_input, v_input)
         v = np.sqrt(v2)
+        thrust = self.F_t = thrust
+        thrust = np.array([thrust * np.cos(angle), thrust * np.sin(angle)])
         r_unit = r_input / r
         v_unit = v_input / v
         h = r - self.r_e
-        rho = 800 / ((7.8974E-24 + 8.89106E-31 * h) * (141.89 + 0.00299 * h) ** 11.388)
+        rho = 1000 / ((7.8974E-24 + 8.89106E-31 * h) * (141.89 + 0.00299 * h) ** 11.388)
         force = - (self.GM * self.m / r2) * r_unit
         force -= rho * v2 * self.C_d * self.A * v_unit
+        force += thrust
         a = force / self.m
         return a
 
@@ -81,8 +99,11 @@ class OrbitDecayEnv(gym.Env):
         pass
 
 
-env = OrbitDecayEnv()
-obs = env.reset()
-for i in range(86400):
-    print(f'i: {i} obs: {obs} dtype: {obs.dtype}')
-    obs = env.step(np.array([0, 0], dtype=np.float32))
+def make_env():
+    return TimeLimit(OrbitDecayEnv(), max_episode_steps=3000)
+
+
+env = make_env()
+model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/')
+model.learn(total_timesteps=10000000)
+
