@@ -70,11 +70,11 @@ One of the highest effects on satellites less than 500 km away from earth is the
 The comparison of thermospheric density, (Pardini \& Anselmo, 2001), concluded that below 400 km the models MSIS-86 and MSISE-90 may be considered the best but TD-88 performed at 10\% accuracy when in low solar activity \cite{pardini_anselmo_2001}. An approximation with comparable results is dubbed as the NASA model \cite{brito_celestino_moraes_2015}\cite{nasa}.
 \begin{equation}
 \rho=\frac{P}{0.2869(T+27301)}
-\end{equation} where $$T=-131.21+0.00299r$$ and $$P=2.488\bigg(\frac{T+273.1}{216.6}\bigg)^{-11.388}.$$
+\end{equation} where $$T=-131.21+0.00299h$$ and $$P=2.488\bigg(\frac{T+273.1}{216.6}\bigg)^{-11.388}.$$
 We can reformulate the equation as 
 \begin{equation}
-\rho=\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31})(141.89+0.00299r)^{11.388}}.
-\end{equation}
+\rho=\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31}h)(141.89+0.00299h)^{11.388}}.
+\end{equation} Where $h$ is the height from earth's surface.
 
 \section{Equations of Motion}
 
@@ -106,7 +106,7 @@ After calculating the resulting acceleration vector using equation~\ref{eq:newto
 	$A\leftarrow1$ surface area normal to the velocity\;
 	\tcc{Iterate for n-steps}
 	\For{$n$ steps}{
-		$\rho\leftarrow\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31})(141.89+0.00299r)^{11.388}}$ \;
+		$\rho\leftarrow\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31}h)(141.89+0.00299h)^{11.388}}$ \;
 		$\vec{F}\leftarrow-G\frac{m_e m}{|\vec{r}|^2}\hat{r}-\frac{1}{2}\rho v^2 C_d A\hat{v}$ \;
 		$\vec{a}\leftarrow\frac{\vec{F}}{m}$ \;
 		$\vec{r}\leftarrow\vec{r}+\vec{v} t+\frac{1}{2}\vec{a}dt^2$ \;
