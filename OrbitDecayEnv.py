@@ -23,7 +23,7 @@ class OrbitDecayEnv(gym.Env):
         self.GM = 3.986004418E14  # Earth's gravitational parameter
         self.C_d = 2.123          # Drag coefficient
         self.A = 1                # Surface area normal to velocity
-        self.F_t = 0.2            # Force of thrust
+        self.F_t = 0.1            # Force of thrust
         self.steps = 1000
         self.orbit_v = None
         # Some state vectors
@@ -87,8 +87,15 @@ class OrbitDecayEnv(gym.Env):
         v_unit = v_input / v
         h = r - self.r_e
         rho = 1000 / ((7.8974E-24 + 8.89106E-31 * h) * (141.89 + 0.00299 * h) ** 11.388)
-        force = - (self.GM * self.m / r2) * r_unit
-        force -= rho * v2 * self.C_d * self.A * v_unit
+
+        if np.any(np.logical_or(np.isnan(r_unit), np.isinf(r_unit))):
+            force = np.zeros(2)
+        else:
+            force = - (self.GM * self.m / r2) * r_unit
+
+        if not np.any(np.logical_or(np.isnan(v_unit), np.isinf(v_unit))):
+            force -= rho * v2 * self.C_d * self.A * v_unit
+
         force += thrust
         a = force / self.m
         return a
@@ -104,16 +111,8 @@ def make_env():
     return TimeLimit(OrbitDecayEnv(), max_episode_steps=3000)
 
 
-def make_venv(rank, seed=0):
-    def _init():
-        env = make_env()
-        env.seed(seed + rank)
-        return env
-    return _init
-
-
 def main():
-    env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    env = make_env()
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/')
     model.learn(total_timesteps=100000000)
 
