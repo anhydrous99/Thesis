@@ -1,4 +1,5 @@
 from stable_baselines.common.policies import MlpPolicy
+from stable_baselines.common.vec_env import SubprocVecEnv
 from gym.wrappers.time_limit import TimeLimit
 from stable_baselines import PPO2
 from gym.utils import seeding
@@ -103,7 +104,20 @@ def make_env():
     return TimeLimit(OrbitDecayEnv(), max_episode_steps=3000)
 
 
-env = make_env()
-model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/')
-model.learn(total_timesteps=10000000)
+def make_venv(rank, seed=0):
+    def _init():
+        env = make_env()
+        env.seed(seed + rank)
+        return env
+    return _init
+
+
+def main():
+    env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/')
+    model.learn(total_timesteps=100000000)
+
+
+if __name__ == '__main__':
+    main()
 
