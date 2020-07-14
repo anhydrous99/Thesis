@@ -23,7 +23,7 @@ class OrbitDecayEnv(gym.Env):
         self.GM = 3.986004418E14  # Earth's gravitational parameter
         self.C_d = 2.123          # Drag coefficient
         self.A = 1                # Surface area normal to velocity
-        self.F_t = 0.1            # Force of thrust
+        self.F_t = 0.2            # Force of thrust
         self.steps = 1000
         self.orbit_v = None
         # Some state vectors
