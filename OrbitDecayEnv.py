@@ -4,8 +4,34 @@ from gym.wrappers.time_limit import TimeLimit
 from stable_baselines import PPO2
 from gym.utils import seeding
 from gym import spaces
+from numba import njit
 import numpy as np
 import gym
+
+
+@njit
+def _acceleration(r_input, v_input, thrust, angle, F_t, r_e, GM, m, C_d, A, steps, dt):
+    ndt = dt / steps
+    for _ in range(steps):
+        r2 = np.dot(r_input, r_input)
+        r = np.sqrt(r2)
+        v2 = np.dot(v_input, v_input)
+        v = np.sqrt(v2)
+        t1 = F_t * thrust
+        t2 = np.array([t1 * np.cos(angle), t1 * np.sin(angle)])
+        r_unit = r_input / r
+        v_unit = v_input / v
+        h = r - r_e
+        rho = 1000 / ((7.8974E-24 + 8.89106E-31 * h) * (141.89 + 0.00299 * h) ** 11.388)
+        force = - (GM * m / r2) * r_unit
+        f = rho * v2 * C_d * A * v_unit
+        force -= f
+
+        force += t2
+        a = force / m
+        r_input += v_input * ndt + 0.5 * a * ndt ** 2
+        v_input += a * ndt
+    return r_input, v_input
 
 
 class OrbitDecayEnv(gym.Env):
@@ -15,14 +41,14 @@ class OrbitDecayEnv(gym.Env):
     }
 
     def __init__(self):
-        self.h = 5.5E5              # Height of satellite 300 km in meters
+        self.h = 5.5E5              # Height of satellite 550 km in meters
         self.r_e = 6.371E6          # Radius of earth in meters
         self.r_s = self.h + self.r_e
-        self.m = 100                # Mass of satellite
-        self.dt = 1                 # Delta t
+        self.m = 1000.0             # Mass of satellite
+        self.dt = 1.0               # Delta t
         self.GM = 3.986004418E14    # Earth's gravitational parameter
         self.C_d = 2.123            # Drag coefficient
-        self.A = 1                  # Surface area normal to velocity
+        self.A = 1.0                # Surface area normal to velocity
         self.F_t = 0.1              # Force of thrust
         self.steps = 1000           # Step per dt
         self.threshold = 12         # Threshold to end episode
@@ -31,7 +57,7 @@ class OrbitDecayEnv(gym.Env):
         # Some state vectors
         self.r = np.zeros(2)
         self.v = np.zeros(2)
-        high = np.array([1, 1, 1, 1, 10], dtype=np.float32)
+        high = np.array([1, 1, 1, 1, self.threshold], dtype=np.float32)
         low = -high
         low[4] = 0
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
@@ -58,13 +84,10 @@ class OrbitDecayEnv(gym.Env):
 
     def step(self, action):
         assert self.action_space.contains(action)
-        dt = self.dt / self.steps
         thrust = action[0]
         angle = action[1] * 2 * np.pi
-        for _ in range(self.steps):
-            a = self._acceleration(self.r, self.v, thrust, angle)
-            self.r += self.v * dt + 0.5 * a * dt ** 2
-            self.v += a * dt
+        self.r, self.v = _acceleration(self.r, self.v, thrust, angle, self.F_t, self.r_e, self.GM, self.m, self.C_d,
+                                       self.A, self.steps, self.dt)
         h = np.linalg.norm(self.r) - self.r_e
         hd = np.abs(self.h - h)  # Distance from intended height
         # Create output state and scale to between -1 and 1
@@ -78,25 +101,6 @@ class OrbitDecayEnv(gym.Env):
 
         return state, reward, done, {}
 
-    def _acceleration(self, r_input, v_input, thrust, angle):
-        r2 = np.dot(r_input, r_input)
-        r = np.sqrt(r2)
-        v2 = np.dot(v_input, v_input)
-        v = np.sqrt(v2)
-        thrust = self.F_t * thrust
-        thrust = np.array([thrust * np.cos(angle), thrust * np.sin(angle)])
-        r_unit = r_input / r
-        v_unit = v_input / v
-        h = r - self.r_e
-        rho = 1000 / ((7.8974E-24 + 8.89106E-31 * h) * (141.89 + 0.00299 * h) ** 11.388)
-        force = - (self.GM * self.m / r2) * r_unit
-        f = rho * v2 * self.C_d * self.A * v_unit
-        force -= f
-
-        force += thrust
-        a = force / self.m
-        return a
-
     def render(self, mode='human'):
         pass
 
@@ -105,7 +109,7 @@ class OrbitDecayEnv(gym.Env):
 
 
 def make_env():
-    return TimeLimit(OrbitDecayEnv(), max_episode_steps=2000)
+    return TimeLimit(OrbitDecayEnv(), max_episode_steps=3000)
 
 
 def make_venv(rank, seed=0):
@@ -120,6 +124,14 @@ def main():
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/')
     model.learn(total_timesteps=100000000)
+
+
+def main2():
+    env = make_env()
+    obs = env.reset()
+    for i in range(2500):
+        print(f'i: {i} obs {obs}')
+        obs, rewards, dones, info = env.step([0.0, 0.0])
 
 
 if __name__ == '__main__':
