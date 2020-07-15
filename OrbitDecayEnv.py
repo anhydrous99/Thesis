@@ -16,15 +16,17 @@ class OrbitDecayEnv(gym.Env):
 
     def __init__(self):
         self.h = 5.5E5              # Height of satellite 300 km in meters
-        self.r_e = 6.371E6        # Radius of earth in meters
+        self.r_e = 6.371E6          # Radius of earth in meters
         self.r_s = self.h + self.r_e
-        self.m = 100              # Mass of satellite
-        self.dt = 1               # Delta t
-        self.GM = 3.986004418E14  # Earth's gravitational parameter
-        self.C_d = 2.123          # Drag coefficient
-        self.A = 1                # Surface area normal to velocity
-        self.F_t = 0.2            # Force of thrust
-        self.steps = 1000
+        self.m = 100                # Mass of satellite
+        self.dt = 1                 # Delta t
+        self.GM = 3.986004418E14    # Earth's gravitational parameter
+        self.C_d = 2.123            # Drag coefficient
+        self.A = 1                  # Surface area normal to velocity
+        self.F_t = 0.1              # Force of thrust
+        self.steps = 1000           # Step per dt
+        self.threshold = 12         # Threshold to end episode
+        self.rho_multiplier = 1000  # Rho is multiplied by this amount
         self.orbit_v = None
         # Some state vectors
         self.r = np.zeros(2)
@@ -33,7 +35,7 @@ class OrbitDecayEnv(gym.Env):
         low = -high
         low[4] = 0
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.viewer = None
         self.seed()
 
@@ -58,7 +60,7 @@ class OrbitDecayEnv(gym.Env):
         assert self.action_space.contains(action)
         dt = self.dt / self.steps
         thrust = action[0]
-        angle = action[1] * np.pi
+        angle = action[1] * 2 * np.pi
         for _ in range(self.steps):
             a = self._acceleration(self.r, self.v, thrust, angle)
             self.r += self.v * dt + 0.5 * a * dt ** 2
@@ -70,7 +72,7 @@ class OrbitDecayEnv(gym.Env):
 
         reward = 1.0
         done = False
-        if hd > 10:
+        if hd > self.threshold:
             reward = 0.0
             done = True
 
@@ -81,20 +83,15 @@ class OrbitDecayEnv(gym.Env):
         r = np.sqrt(r2)
         v2 = np.dot(v_input, v_input)
         v = np.sqrt(v2)
-        thrust = self.F_t = thrust
+        thrust = self.F_t * thrust
         thrust = np.array([thrust * np.cos(angle), thrust * np.sin(angle)])
         r_unit = r_input / r
         v_unit = v_input / v
         h = r - self.r_e
         rho = 1000 / ((7.8974E-24 + 8.89106E-31 * h) * (141.89 + 0.00299 * h) ** 11.388)
-
-        if np.any(np.logical_or(np.isnan(r_unit), np.isinf(r_unit))):
-            force = np.zeros(2)
-        else:
-            force = - (self.GM * self.m / r2) * r_unit
-
-        if not np.any(np.logical_or(np.isnan(v_unit), np.isinf(v_unit))):
-            force -= rho * v2 * self.C_d * self.A * v_unit
+        force = - (self.GM * self.m / r2) * r_unit
+        f = rho * v2 * self.C_d * self.A * v_unit
+        force -= f
 
         force += thrust
         a = force / self.m
@@ -108,11 +105,19 @@ class OrbitDecayEnv(gym.Env):
 
 
 def make_env():
-    return TimeLimit(OrbitDecayEnv(), max_episode_steps=3000)
+    return TimeLimit(OrbitDecayEnv(), max_episode_steps=2000)
+
+
+def make_venv(rank, seed=0):
+    def _init():
+        env = make_env()
+        env.seed(seed + rank)
+        return env
+    return _init
 
 
 def main():
-    env = make_env()
+    env = SubprocVecEnv([make_venv(i) for i in range(16)])
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/')
     model.learn(total_timesteps=100000000)
 
