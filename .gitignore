@@ -424,3 +424,5 @@ dmypy.json
 cython_debug/
 
 training_result/
+
+.idea/
