@@ -28,14 +28,31 @@ def acc(r_input, v_input, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
 
 
 @njit
-def calculate_physics(x, v, thrust, angle, F_t, r_e, GM, m, C_d, A, steps, dt, rm):
+def yoshida(r, v, dt, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
+    c1 = 0.6756035959798288170238
+    c2 = -0.1756035959798288170238
+    c3 = -0.1756035959798288170238
+    c4 = 0.6756035959798288170238
+    d1 = 1.3512071919596576340476
+    d2 = -1.7024143839193152680953
+    d3 = 1.3512071919596576340476
+    r1 = r + c1 * dt * v
+    v1 = v + d1 * dt * acc(r1, v, thrust, angle, r_e, rm, GM, m, C_d, A, F_t)
+    r2 = r1 + c2 * dt * v1
+    v2 = v1 + d2 * dt * acc(r2, v1, thrust, angle, r_e, rm, GM, m, C_d, A, F_t)
+    r3 = r2 + c3 * dt * v2
+    v3 = v2 + d3 * dt * acc(r3, v2, thrust, angle, r_e, rm, GM, m, C_d, A, F_t)
+    r = r3 + c4 * v3 * dt
+    v = v3
+    return r, v
+
+
+@njit
+def calculate_physics(r, v, thrust, angle, F_t, r_e, GM, m, C_d, A, steps, dt, rm):
     ndt = dt / steps
     for _ in range(steps):
-        a = acc(x, v, thrust, angle, r_e, rm, GM, m, C_d, A, F_t)
-        v = v + a * ndt / 2
-        x = x + v * ndt
-        v = v + a * ndt / 2
-    return x, v
+        r, v = yoshida(r, v, ndt, thrust, angle, r_e, rm, GM, m, C_d, A, F_t)
+    return r, v
 
 
 class OrbitDecayEnv(gym.Env):
@@ -48,15 +65,15 @@ class OrbitDecayEnv(gym.Env):
         self.h = 5.5E5             # Height of satellite 550 km in meters
         self.r_e = 6.371E6          # Radius of earth in meters
         self.r_s = self.h + self.r_e
-        self.m = 1000.0             # Mass of satellite
+        self.m = 100.0             # Mass of satellite
         self.dt = 1.0               # Delta t
         self.GM = 3.986004418E14    # Earth's gravitational parameter
         self.C_d = 2.123            # Drag coefficient
         self.A = 1.0                # Surface area normal to velocity
         self.F_t = 0.01              # Force of thrust
-        self.steps = 10000           # Step per dt
+        self.steps = 1           # Step per dt
         self.threshold = 1          # Threshold to end episode
-        self.rho_multiplier = 11000  # Rho is multiplied by this amount
+        self.rho_multiplier = 3180     # Rho is multiplied by this amount
         self.orbit_v = np.sqrt(self.GM / self.r_s)
         # Some state vectors
         self.r = np.zeros(2)
@@ -82,7 +99,7 @@ class OrbitDecayEnv(gym.Env):
             0,
             self.orbit_v
         ])
-        return np.concatenate((self.r, self.v, np.zeros(1)))
+        return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(1)))
 
     def step(self, action):
         assert self.action_space.contains(action)
@@ -90,9 +107,8 @@ class OrbitDecayEnv(gym.Env):
         angle = action[1] * 2 * np.pi
         self.r, self.v = calculate_physics(self.r, self.v, thrust, angle, self.F_t, self.r_e, self.GM, self.m, self.C_d,
                                            self.A, self.steps, self.dt, self.rho_multiplier)
-        # Height
-        h = np.linalg.norm(self.r) - self.r_e
-        hd = np.abs(self.h - h)  # Distance from intended height
+        # Distance from target
+        hd = np.abs(np.linalg.norm(self.r) - self.r_s)
         # Create output state and scale to between -1 and 1
         state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd]))
 
@@ -136,11 +152,11 @@ def main():
 def main2():
     env = make_env()
     obs = env.reset()
-    for i in range(2000):
+    for i in range(1000):
         print(f'i: {i} obs {obs}')
         obs, rewards, dones, info = env.step([0.0, 0.0])
 
 
 if __name__ == '__main__':
-    main()
+    main2()
 

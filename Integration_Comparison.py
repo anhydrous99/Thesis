@@ -12,11 +12,6 @@ yoshida_constants = {
     'd3': 1.3512071919596576340476
 }
 
-newmark_constants = {
-    'alpha': 0.5,
-    'beta': 0.25
-}
-
 
 def acc(r_input, GM=3.986004418E14, m=100):
     """
