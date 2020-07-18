@@ -1,7 +1,6 @@
-from stable_baselines.common.policies import MlpPolicy
-from stable_baselines.common.vec_env import SubprocVecEnv
+from stable_baselines.sac.policies import MlpPolicy
 from gym.wrappers.time_limit import TimeLimit
-from stable_baselines import PPO2
+from stable_baselines import SAC
 from gym.utils import seeding
 from gym import spaces
 from numba import njit
@@ -75,7 +74,6 @@ class OrbitDecayEnv(gym.Env):
         return [seed]
 
     def reset(self):
-        theta = self.np_random.uniform(low=0, high=2 * np.pi)
         self.r = np.array([
             self.r_s,
             0
@@ -127,9 +125,11 @@ def make_venv(rank, seed=0):
 
 def main():
     n_steps = int(1e7)
-    env = SubprocVecEnv([make_venv(i) for i in range(16)])
-    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/',
-                 n_steps=1024, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
+    env = make_env()
+    #env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    #model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/',
+    #             n_steps=1024, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
+    model = SAC(MlpPolicy, env, batch_size=256, learning_starts=1000, verbose=1, tensorboard_log='./training_result/')
     model.learn(total_timesteps=n_steps)
 
 

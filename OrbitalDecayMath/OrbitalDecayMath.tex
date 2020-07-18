@@ -115,6 +115,10 @@ After calculating the resulting acceleration vector using equation~\ref{eq:newto
 	\caption{Problem Simulation - No Propulsion}\label{alg:problemsim}
 \end{algorithm}
 
+\section{Physics Integrator Comparison}
+
+At Low Earth Orbit, the standard method of calculating the next time step via, the Explicit Euler Method, equations~\ref{eq:vel} and \ref{eq:pos} is insufficient. This particular problem requires the use of momentum preserving and symplectic integrators, variational integrators. Amoung the variational integrators there is the leapfrog integration, verlet integration, Newmark-beta, and partitioned Runge-Kutta integrators.
+
 \newpage
 
 \bibliographystyle{acm}
