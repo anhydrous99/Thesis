@@ -4,12 +4,10 @@ from gym.wrappers.time_limit import TimeLimit
 from stable_baselines import PPO2
 from gym.utils import seeding
 from gym import spaces
-from numba import njit
 import numpy as np
 import gym
 
 
-@njit
 def acc(r_input, v_input, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     r2 = np.dot(r_input, r_input)
     r = np.sqrt(r2)
@@ -30,7 +28,6 @@ def acc(r_input, v_input, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     return a
 
 
-@njit
 def yoshida(r, v, dt, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     c1 = 0.6756035959798288170238
     c2 = -0.1756035959798288170238
@@ -50,7 +47,6 @@ def yoshida(r, v, dt, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     return r, v
 
 
-@njit
 def calculate_physics(r, v, thrust, angle, F_t, r_e, GM, m, C_d, A, steps, dt, rm):
     ndt = dt / steps
     for _ in range(steps):
@@ -161,16 +157,16 @@ def main2():
 def objective(trial):
     steps = int(1e7)
     n_steps = trial.suggest_categorical("n_steps", [32, 64, 128, 254, 512, 1024, 2048, 4096])
-    nminibatches = trial.suggest_categorical("nminibatches", [1, 4, 6, 8, 12, 32, 64, 128])
+    nminibatches = trial.suggest_categorical("nminibatches", [4, 6, 8, 12, 32, 64, 128])
     noptepochs = trial.suggest_categorical("noptepochs", [4, 6, 10, 20])
     gamma = trial.suggest_uniform("gamma", 0.8, 0.9997)
     lam = trial.suggest_uniform("lam", 0.9, 1)
     entcoeff = trial.suggest_uniform("entcoeff", 0, 0.01)
     learning_rate = trial.suggest_float("learning_rate", 5e-6, 0.003, log=True)
     envs = SubprocVecEnv([make_venv(i) for i in range(16)])
-    model = PPO2(MlpPolicy, envs, n_steps=n_steps, nminibatches=nminibatches, noptepochs=noptepochs,
+    model = PPO2(MlpPolicy, envs, verbose=1, n_steps=n_steps, nminibatches=nminibatches, noptepochs=noptepochs,
                  gamma=gamma, lam=lam, ent_coef=entcoeff, learning_rate=learning_rate)
-    model.learn(total_timesteps=n_steps)
+    model.learn(total_timesteps=steps)
 
     env = make_env()
     reward_list = []
