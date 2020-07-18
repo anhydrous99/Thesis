@@ -158,6 +158,36 @@ def main2():
         obs, rewards, dones, info = env.step([0.0, 0.0])
 
 
+def objective(trial):
+    steps = int(1e7)
+    n_steps = trial.suggest_categorical("n_steps", [32, 64, 128, 254, 512, 1024, 2048, 4096])
+    nminibatches = trial.suggest_categorical("nminibatches", [1, 4, 6, 8, 12, 32, 64, 128])
+    noptepochs = trial.suggest_categorical("noptepochs", [4, 6, 10, 20])
+    gamma = trial.suggest_uniform("gamma", 0.8, 0.9997)
+    lam = trial.suggest_uniform("lam", 0.9, 1)
+    entcoeff = trial.suggest_uniform("entcoeff", 0, 0.01)
+    learning_rate = trial.suggest_float("learning_rate", 5e-6, 0.003, log=True)
+    envs = SubprocVecEnv([make_venv(i) for i in range(16)])
+    model = PPO2(MlpPolicy, envs, n_steps=n_steps, nminibatches=nminibatches, noptepochs=noptepochs,
+                 gamma=gamma, lam=lam, ent_coef=entcoeff, learning_rate=learning_rate)
+    model.learn(total_timesteps=n_steps)
+
+    env = make_env()
+    reward_list = []
+    for _ in range(100):
+        done = False
+        obs = env.reset()
+        total = 0
+        while not done:
+            action, _states = model.predict(obs)
+            obs, reward, done, info = env.step(action)
+            total += reward
+            if done:
+                break
+        reward_list.append(total)
+    env.close()
+    return np.average(reward_list)
+
+
 if __name__ == '__main__':
     main()
-
