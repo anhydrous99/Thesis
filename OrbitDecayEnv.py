@@ -1,6 +1,7 @@
-from stable_baselines.sac.policies import MlpPolicy
+from stable_baselines.common.policies import MlpPolicy
+from stable_baselines.common.vec_env import SubprocVecEnv
 from gym.wrappers.time_limit import TimeLimit
-from stable_baselines import SAC
+from stable_baselines import PPO2
 from gym.utils import seeding
 from gym import spaces
 from numba import njit
@@ -19,9 +20,11 @@ def acc(r_input, v_input, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     r_unit = r_input / r
     v_unit = v_input / v
     h = r - r_e
+    perturbation = 0.05 * np.random.randn()
     rho = rm / ((7.8974E-24 + 8.89106E-31 * h) * (141.89 + 0.00299 * h) ** 11.388)
+    drag = rho * v2 * C_d * A * v_unit
     force = - (GM * m / r2) * r_unit
-    force -= rho * v2 * C_d * A * v_unit
+    force -= drag + perturbation * drag
     force += t2
     a = force / m
     return a
@@ -73,7 +76,7 @@ class OrbitDecayEnv(gym.Env):
         self.F_t = 0.01              # Force of thrust
         self.steps = 1           # Step per dt
         self.threshold = 1          # Threshold to end episode
-        self.rho_multiplier = 3180     # Rho is multiplied by this amount
+        self.rho_multiplier = 10000     # Rho is multiplied by this amount
         self.orbit_v = np.sqrt(self.GM / self.r_s)
         # Some state vectors
         self.r = np.zeros(2)
@@ -128,7 +131,7 @@ class OrbitDecayEnv(gym.Env):
 
 
 def make_env():
-    return TimeLimit(OrbitDecayEnv(), max_episode_steps=3000)
+    return TimeLimit(OrbitDecayEnv(), max_episode_steps=2000)
 
 
 def make_venv(rank, seed=0):
@@ -141,11 +144,9 @@ def make_venv(rank, seed=0):
 
 def main():
     n_steps = int(1e7)
-    env = make_env()
-    #env = SubprocVecEnv([make_venv(i) for i in range(16)])
-    #model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/',
-    #             n_steps=1024, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
-    model = SAC(MlpPolicy, env, batch_size=256, learning_starts=1000, verbose=1, tensorboard_log='./training_result/')
+    env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/',
+                 n_steps=1024, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
     model.learn(total_timesteps=n_steps)
 
 
@@ -158,5 +159,5 @@ def main2():
 
 
 if __name__ == '__main__':
-    main2()
+    main()
 
