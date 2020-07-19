@@ -4,10 +4,13 @@ from gym.wrappers.time_limit import TimeLimit
 from stable_baselines import PPO2
 from gym.utils import seeding
 from gym import spaces
+from numba import njit
 import numpy as np
+import optuna
 import gym
 
 
+@njit
 def acc(r_input, v_input, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     r2 = np.dot(r_input, r_input)
     r = np.sqrt(r2)
@@ -28,6 +31,7 @@ def acc(r_input, v_input, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     return a
 
 
+@njit
 def yoshida(r, v, dt, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     c1 = 0.6756035959798288170238
     c2 = -0.1756035959798288170238
@@ -47,6 +51,7 @@ def yoshida(r, v, dt, thrust, angle, r_e, rm, GM, m, C_d, A, F_t):
     return r, v
 
 
+@njit
 def calculate_physics(r, v, thrust, angle, F_t, r_e, GM, m, C_d, A, steps, dt, rm):
     ndt = dt / steps
     for _ in range(steps):
@@ -185,5 +190,11 @@ def objective(trial):
     return np.average(reward_list)
 
 
+def main3():
+    study = optuna.study.load_study('no-name-0707ddc2-51d5-4c3d-b978-8bfb3c8d3c5f',
+                                    'mysql://root:d7lD9JdOdlJKzHx3@34.71.13.182/study')
+    study.optimize(objective)
+
+
 if __name__ == '__main__':
-    main()
+    main3()
