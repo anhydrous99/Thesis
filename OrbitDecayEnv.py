@@ -163,7 +163,7 @@ def objective(trial):
     lam = trial.suggest_uniform("lam", 0.9, 1)
     entcoeff = trial.suggest_uniform("entcoeff", 0, 0.01)
     learning_rate = trial.suggest_float("learning_rate", 5e-6, 0.003, log=True)
-    envs = SubprocVecEnv([make_venv(i) for i in range(16)])
+    envs = SubprocVecEnv([make_venv(i) for i in range(12)])
     model = PPO2(MlpPolicy, envs, verbose=1, n_steps=n_steps, nminibatches=nminibatches, noptepochs=noptepochs,
                  gamma=gamma, lam=lam, ent_coef=entcoeff, learning_rate=learning_rate)
     model.learn(total_timesteps=steps)
