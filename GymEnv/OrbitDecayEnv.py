@@ -1,7 +1,10 @@
+from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
+from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
+from stable_baselines.common.noise import OrnsteinUhlenbeckActionNoise
+from stable_baselines.common.callbacks import EvalCallback
 from stable_baselines.common.policies import MlpPolicy
-from stable_baselines.common.vec_env import SubprocVecEnv
 from gym.wrappers.time_limit import TimeLimit
-from stable_baselines import PPO2
+from stable_baselines import PPO2, SAC, TD3
 from gym.utils import seeding
 from gym import spaces
 from numba import njit
@@ -144,11 +147,30 @@ def make_venv(rank, seed=0):
 
 
 def main():
-    n_steps = int(2e7)
-    env = SubprocVecEnv([make_venv(i) for i in range(16)])
-    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/',
-                 n_steps=512, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
-    model.learn(total_timesteps=n_steps)
+    env = make_env()
+    eval_env = make_env()
+    data_path = './training_result/'
+    ppo_callback = EvalCallback(eval_env, log_path=data_path + 'ppo/', n_eval_episodes=100, eval_freq=100000)
+    sac_callback = EvalCallback(eval_env, log_path=data_path + 'sac/', n_eval_episodes=100, eval_freq=100000)
+    td3_callback = EvalCallback(eval_env, log_path=data_path + 'td3/', n_eval_episodes=100, eval_freq=100000)
+
+    n_actions = env.action_space.shape[-1]
+    action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(n_actions), sigma=float(0.5) * np.ones(n_actions))
+
+    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
+                 n_steps=256, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
+    model.learn(total_timesteps=10000000, callback=ppo_callback,
+                tb_log_name='PPO2_nsteps256_nminibatches1_lam098_gamma0999_noptepochs4')
+
+    model = SAC(SACMlpPolicy, env, verbose=1, tensorboard_log=data_path,
+                buffer_size=1000000, learning_starts=1000, action_noise=action_noise)
+    model.learn(total_timesteps=10000000, callback=sac_callback,
+                tb_log_name='SAC_bf1000000_ls1000')
+
+    model = TD3(TD3MlpPolicy, env, verbose=1, tensorboard_log=data_path,
+                buffer_size=1000000, learning_starts=1000, action_noise=action_noise)
+    model.learn(total_timesteps=10000000, callback=td3_callback,
+                tb_log_name='TD3_bf1000000_ls1000')
 
 
 def test(n):
