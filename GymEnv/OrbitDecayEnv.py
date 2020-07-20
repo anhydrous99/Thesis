@@ -6,6 +6,7 @@ from gym.utils import seeding
 from gym import spaces
 from numba import njit
 import numpy as np
+import argparse
 import gym
 
 
@@ -146,17 +147,23 @@ def main():
     n_steps = int(2e7)
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/',
-                 n_steps=1024, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
+                 n_steps=512, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
     model.learn(total_timesteps=n_steps)
 
 
-def main2():
+def test(n):
     env = make_env()
     obs = env.reset()
-    for i in range(1000):
+    for i in range(n):
         print(f'i: {i} obs {obs}')
         obs, rewards, dones, info = env.step([0.0, 0.0])
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--test', default='0', help='If not set to 0, runs a test for n steps')
+    n = int(parser.parse_args().test)
+    if n == 0:
+        main()
+    else:
+        test(n)
