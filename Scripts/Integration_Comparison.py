@@ -153,8 +153,8 @@ def main():
     plt.figure(figsize=(8, 8), dpi=80)
     df.plot()
     plt.yscale('log')
-    df.to_csv('data/Integration_comparison.csv')
-    plt.savefig('plots/Integration_comparison.png', bbox_inches='tight')
+    df.to_csv('../Data/Integration_comparison.csv')
+    plt.savefig('../Plots/Integration_comparison.png', bbox_inches='tight')
 
 
 if __name__ == '__main__':
