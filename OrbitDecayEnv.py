@@ -6,7 +6,6 @@ from gym.utils import seeding
 from gym import spaces
 from numba import njit
 import numpy as np
-import optuna
 import gym
 
 
@@ -74,7 +73,7 @@ class OrbitDecayEnv(gym.Env):
         self.GM = 3.986004418E14    # Earth's gravitational parameter
         self.C_d = 2.123            # Drag coefficient
         self.A = 1.0                # Surface area normal to velocity
-        self.F_t = 0.01              # Force of thrust
+        self.F_t = 0.02              # Force of thrust
         self.steps = 1           # Step per dt
         self.threshold = 1          # Threshold to end episode
         self.rho_multiplier = 10000     # Rho is multiplied by this amount
@@ -132,7 +131,7 @@ class OrbitDecayEnv(gym.Env):
 
 
 def make_env():
-    return TimeLimit(OrbitDecayEnv(), max_episode_steps=2000)
+    return TimeLimit(OrbitDecayEnv(), max_episode_steps=1000)
 
 
 def make_venv(rank, seed=0):
@@ -144,7 +143,7 @@ def make_venv(rank, seed=0):
 
 
 def main():
-    n_steps = int(1e7)
+    n_steps = int(2e7)
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log='./training_result/',
                  n_steps=1024, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
@@ -159,42 +158,5 @@ def main2():
         obs, rewards, dones, info = env.step([0.0, 0.0])
 
 
-def objective(trial):
-    steps = int(1e7)
-    n_steps = trial.suggest_categorical("n_steps", [32, 64, 128, 254, 512, 1024, 2048, 4096])
-    nminibatches = trial.suggest_categorical("nminibatches", [4, 6, 8, 12, 32, 64, 128])
-    noptepochs = trial.suggest_categorical("noptepochs", [4, 6, 10, 20])
-    gamma = trial.suggest_uniform("gamma", 0.8, 0.9997)
-    lam = trial.suggest_uniform("lam", 0.9, 1)
-    entcoeff = trial.suggest_uniform("entcoeff", 0, 0.01)
-    learning_rate = trial.suggest_float("learning_rate", 5e-6, 0.003, log=True)
-    envs = SubprocVecEnv([make_venv(i) for i in range(12)])
-    model = PPO2(MlpPolicy, envs, verbose=1, n_steps=n_steps, nminibatches=nminibatches, noptepochs=noptepochs,
-                 gamma=gamma, lam=lam, ent_coef=entcoeff, learning_rate=learning_rate)
-    model.learn(total_timesteps=steps)
-
-    env = make_env()
-    reward_list = []
-    for _ in range(100):
-        done = False
-        obs = env.reset()
-        total = 0
-        while not done:
-            action, _states = model.predict(obs)
-            obs, reward, done, info = env.step(action)
-            total += reward
-            if done:
-                break
-        reward_list.append(total)
-    env.close()
-    return np.average(reward_list)
-
-
-def main3():
-    study = optuna.study.load_study('no-name-0707ddc2-51d5-4c3d-b978-8bfb3c8d3c5f',
-                                    'mysql://root:d7lD9JdOdlJKzHx3@34.71.13.182/study')
-    study.optimize(objective)
-
-
 if __name__ == '__main__':
-    main3()
+    main()
