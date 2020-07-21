@@ -2,9 +2,10 @@ from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
 from stable_baselines.common.noise import OrnsteinUhlenbeckActionNoise
 from stable_baselines.common.callbacks import EvalCallback
+from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
 from gym.wrappers.time_limit import TimeLimit
-from stable_baselines import PPO2, SAC, TD3
+from stable_baselines import PPO2, SAC, TD3, A2C, ACKTR
 from gym.utils import seeding
 from gym import spaces
 from numba import njit
@@ -151,6 +152,8 @@ def main():
     eval_env = make_env()
     data_path = './training_result/'
     ppo_callback = EvalCallback(eval_env, log_path=data_path + 'ppo/', n_eval_episodes=100, eval_freq=100000)
+    a2c_callback = EvalCallback(eval_env, log_path=data_path + 'a2c/', n_eval_episodes=100, eval_freq=100000)
+    acktr_callback = EvalCallback(eval_env, log_path=data_path + 'acktr/', n_eval_episodes=100, eval_freq=100000)
     sac_callback = EvalCallback(eval_env, log_path=data_path + 'sac/', n_eval_episodes=100, eval_freq=100000)
     td3_callback = EvalCallback(eval_env, log_path=data_path + 'td3/', n_eval_episodes=100, eval_freq=100000)
 
@@ -160,17 +163,27 @@ def main():
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
                  n_steps=256, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
     model.learn(total_timesteps=10000000, callback=ppo_callback,
-                tb_log_name='PPO2_nsteps256_nminibatches1_lam098_gamma0999_noptepochs4')
+                tb_log_name='PPO2')
+
+    model = A2C(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
+                ent_coef=0.001)
+    model.learn(total_timesteps=10000000, callback=a2c_callback,
+                tb_log_name='A2C')
+
+    model = ACKTR(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
+                  gamma=0.99, n_steps=16, ent_coef=0.0)
+    model.learn(total_timesteps=10000000, callback=acktr_callback,
+                tb_log_name='ACKTR')
 
     model = SAC(SACMlpPolicy, env, verbose=1, tensorboard_log=data_path,
                 buffer_size=1000000, learning_starts=1000, action_noise=action_noise)
     model.learn(total_timesteps=10000000, callback=sac_callback,
-                tb_log_name='SAC_bf1000000_ls1000')
+                tb_log_name='SAC')
 
     model = TD3(TD3MlpPolicy, env, verbose=1, tensorboard_log=data_path,
                 buffer_size=1000000, learning_starts=1000, action_noise=action_noise)
     model.learn(total_timesteps=10000000, callback=td3_callback,
-                tb_log_name='TD3_bf1000000_ls1000')
+                tb_log_name='TD3')
 
 
 def test(n):
