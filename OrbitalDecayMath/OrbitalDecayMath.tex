@@ -41,10 +41,10 @@ The force of gravity, and most Action-at-a-Distance Forces, exist by the inverse
 \end{equation}
  where $\hat{r}$ is the unit vector of $r$.
 
-Newton's Law of Universal Gravitation gives us the key to the story between objects in the vacuum of space. For instance, if we have $n$ objects, the force on object 1 is $$F_1=\sum_{i=2}^n{G\frac{m_1 m_i}{r_{1i}^2}}$$ and, as we see for the calculation for object 1, the computational complexity for a single object is $O(n)$ and therefore to calculate the force on all $n$ objects the complexity is $O(n^2)$. Using these force along with Newton's second law the velocity and position can then be calculated.
+Newton's Law of Universal Gravitation gives us the key to the story between objects in the vacuum of space. For instance, if we have $n$ objects, the force on object 1 is $$F_1=\sum_{i=2}^n{G\frac{m_1 m_i}{r_{1i}^2}}$$ and, as we see for the calculation for object 1, the computational complexity for a single object is $O(n)$ and therefore to calculate the force on all $n$ objects the complexity is $O(n^2)$. Using these force along with Newton's second law the velocity and position can then be calculated, assuming constant acceleration in a straight line.
 \begin{align}
 	\vec{v} &= \vec{v}_0+\vec{a}t \label{eq:vel}\\
-	\vec{r} &= \vec{r}_0+\vec{v}_0 t+\frac{1}{2}\vec{a}t^2\label{eq:pos}
+	\vec{r} &= \vec{r}_0+\Big(\frac{v+v_0}{2}\Big)t\label{eq:pos}
 \end{align}
 Now, this is enough information to simulate the restricted 3-body system but it is not enough to calculate initial orbit velocities, orbit characteristics, or most optimal trajectory. In fact for large $n$ relying on this law is practically impossible due to the quadratic complexity. Hence, we can use numerical integration to approximate Newton's laws.
 
@@ -90,7 +90,7 @@ To put everything together, let's start building our equations of motion and fin
 \begin{equation}
 \vec{F}=-G\frac{m_e m}{|\vec{r}|^2}\hat{r}-\frac{1}{2}\rho v^2 C_d A\hat{v}
 \end{equation}
-After calculating the resulting acceleration vector using equation~\ref{eq:newton}, calculate the next time step's velocity and position using equation~\ref{eq:vel} and equation~\ref{eq:pos}. This results in Algorithm~\ref{alg:problemsim}.
+After calculating the resulting acceleration vector using equation~\ref{eq:newton}, calculate the next time step's velocity and position. This results in Algorithm~\ref{alg:problemsim}.
 
 \begin{algorithm}
 	\SetAlgoLined
@@ -111,20 +111,29 @@ After calculating the resulting acceleration vector using equation~\ref{eq:newto
 		$\rho\leftarrow\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31}h)(141.89+0.00299h)^{11.388}}$ \;
 		$\vec{F}\leftarrow-G\frac{m_e m}{|\vec{r}|^2}\hat{r}-\frac{1}{2}\rho v^2 C_d A\hat{v}$ \;
 		$\vec{a}\leftarrow\frac{\vec{F}}{m}$ \;
-		$\vec{r}\leftarrow\vec{r}+\vec{v} t+\frac{1}{2}\vec{a}dt^2$ \;
-		$\vec{v}\leftarrow\vec{v}+\vec{a}dt$
+		$\vec{v}, \vec{r}\leftarrow \text{calculate\_next}(\vec{a}, \vec{v}, \vec{r})$
 	}
 	\caption{Problem Simulation - No Propulsion}\label{alg:problemsim}
 \end{algorithm}
 
 \section{Physics Integrator Comparison}
 
-At Low Earth Orbit, the standard method of calculating the next time step via, the Explicit Euler Method, equations~\ref{eq:vel} and \ref{eq:pos} is insufficient. This particular problem requires the use of momentum preserving and symplectic integrators, variational integrators. Among the integrators compared, variatonal and non-variational, is the Explicit Euler, Semi-Implicit Euler, Leapfrog, Verlet, Yoshida, and RK4.
+At Low Earth Orbit, the standard method of calculating the next time step via, the Explicit Euler Method, equations~\ref{eq:vel} and \ref{eq:pos} is insufficient. This particular problem requires the use of momentum preserving and symplectic integrators, variational integrators. Among the integrators compared, variatonal and non-variational, is the Explicit Euler, Semi-Implicit Euler, Leapfrog, Verlet, Yoshida, and the 4th Order Runge-Kutta (RK4) integrator.
+
+The kinematic equations can be expressed as set of ordinary differential equations (ODEs), since $a$ is the derivative of $v$ and $v$ is the derivative of $r$,
+\begin{align*}
+\dot{v}&=a\\
+\dot{r}&=v.
+\end{align*} The Euler method defined as $$y_{n+1}=y_n+hf(t_n, y_n).$$ Here then the equations for position and velocity is 
+\begin{align*}
+\vec{r}_{n+1}&=\vec{r}_n+\vec{v}_n \Delta t\\
+\vec{v}_{n+1}&=\vec{v}_n+\vec{a} \Delta t.
+\end{align*}. 
 
 \begin{figure}
 \centering
-\includegraphics{Integration_comparison}
-\caption{Error plot of various physics integrators. Where the x-axis is the error and the y-axis is the number of time steps taken. The l1 error was calculated with regards to the physics of a point mass with a circular orbit around another, fixed, point mass of greater mass. It was measured by $|r-r_i|$ where $r_i$ is the initial radius and $r$ is the current radius. E Euler stands for Explicit Euler, SI Euler stands for Semi-Implicit Euler, and rk4 stands for the 4th Order Runge-Kutta Integrator.}
+\includegraphics[scale=0.75]{Integration_comparison}
+\caption{Error plot of various physics integrators. Where the x-axis is the error and the y-axis is the number of time steps taken. The l1 error was calculated with regards to the physics of a point mass with a circular orbit around another, fixed, point mass of greater mass. It was measured by $|r-r_i|$ where $r_i$ is the initial radius and $r$ is the current radius. E Euler stands for Explicit Euler, SI Euler stands for Semi-Implicit Euler, and rk4 stands for the 4th Order Runge-Kutta Integrator (RK4).}
 \end{figure}
 
 \newpage
