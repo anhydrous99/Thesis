@@ -120,6 +120,7 @@ After calculating the resulting acceleration vector using equation~\ref{eq:newto
 
 At Low Earth Orbit, the standard method of calculating the next time step via, the Explicit Euler Method, equations~\ref{eq:vel} and \ref{eq:pos} is insufficient. This particular problem requires the use of momentum preserving and symplectic integrators, variational integrators. Among the integrators compared, variatonal and non-variational, is the Explicit Euler, Semi-Implicit Euler, Leapfrog, Verlet, Yoshida, and the 4th Order Runge-Kutta (RK4) integrator.
 
+\subsection{Euler}
 The kinematic equations can be expressed as set of ordinary differential equations (ODEs), since $a$ is the derivative of $v$ and $v$ is the derivative of $r$,
 \begin{align*}
 \dot{v}&=a\\
@@ -130,10 +131,22 @@ The kinematic equations can be expressed as set of ordinary differential equatio
 \vec{v}_{n+1}&=\vec{v}_n+\vec{a} \Delta t.
 \end{align*}. 
 
+While the Explicit Euler method mentioned above works well for object that go in a straight line and have constant acceleration, for more complicated models, a more intricate system will result in errors. The Semi-Implicit Euler method, a modified version of the Explicit Euler method, is designed to solve Hamilton's equations and is therefore a symplectic integrator. It is defined, with regard to the problem of calculating change position and velocity from the acceleration, as  
+\begin{align*}
+\vec{v}_{n+1}&=\vec{v}_n+\vec{a} \Delta t\\
+\vec{r}_{n+1}&=\vec{r}_n+\vec{v}_{n+1} \Delta t.
+\end{align*}
+
+\subsection{Leapfrog}
+
+Leapfrog Integration, similar to the velocity verlet method, 
+
+\subsection{4th order Yoshida}
+
 \begin{figure}
 \centering
 \includegraphics[scale=0.75]{Integration_comparison}
-\caption{Error plot of various physics integrators. Where the x-axis is the error and the y-axis is the number of time steps taken. The l1 error was calculated with regards to the physics of a point mass with a circular orbit around another, fixed, point mass of greater mass. It was measured by $|r-r_i|$ where $r_i$ is the initial radius and $r$ is the current radius. E Euler stands for Explicit Euler, SI Euler stands for Semi-Implicit Euler, and rk4 stands for the 4th Order Runge-Kutta Integrator (RK4).}
+\caption{L1 Error plot of various physics integrators. Where the x-axis is the l1 error and the y-axis is the number of time steps taken. The l1 error was calculated with regards to the physics of a point mass with a circular orbit around another, fixed, point mass of greater mass. It was measured by $|r-r_t|$ where $r_t$ is the target radius and $r$ is the radius at step $t$.}
 \end{figure}
 
 \newpage

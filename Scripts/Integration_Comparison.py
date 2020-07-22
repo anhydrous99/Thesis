@@ -128,12 +128,12 @@ def rk4(r, v):
 
 def main():
     to_test = {
-        'E Euler': explicit_euler,
-        'SI Euler': semi_implicit_euler,
+        'Explicit Euler': explicit_euler,
+        'Semi-Implicit Euler': semi_implicit_euler,
         'Leapfrog': leapfrog2,
         'Yoshida': yoshida,
         'Verlet': velocity_verlet,
-        'rk4': rk4
+        'RK4': rk4
     }
     data = {}
     for test in to_test:
@@ -153,6 +153,8 @@ def main():
     plt.figure(figsize=(8, 8), dpi=80)
     df.plot()
     plt.yscale('log')
+    plt.xlabel('Steps')
+    plt.ylabel('L1 Error')
     df.to_csv('../Data/Integration_comparison.csv')
     plt.savefig('../Plots/Integration_comparison.png', bbox_inches='tight')
 
