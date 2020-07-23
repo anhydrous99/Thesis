@@ -1,8 +1,9 @@
 from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
 from stable_baselines.common.noise import OrnsteinUhlenbeckActionNoise
+from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.callbacks import EvalCallback
-#from stable_baselines.common.vec_env import SubprocVecEnv
+from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
 from gym.wrappers.time_limit import TimeLimit
 from stable_baselines import PPO2, SAC, TD3, A2C, ACKTR
@@ -11,6 +12,7 @@ from gym import spaces
 from numba import njit
 import numpy as np
 import argparse
+import optuna
 import gym
 
 
@@ -86,9 +88,10 @@ class OrbitDecayEnv(gym.Env):
         # Some state vectors
         self.r = np.zeros(2)
         self.v = np.zeros(2)
-        high = np.array([1, 1, 1, 1, self.threshold], dtype=np.float32)
+        high = np.array([1, 1, 1, 1, self.threshold, 1], dtype=np.float32)
         low = -high
         low[4] = 0
+        low[5] = 0
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
         self.action_space = spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.viewer = None
@@ -107,7 +110,7 @@ class OrbitDecayEnv(gym.Env):
             0,
             self.orbit_v
         ])
-        return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(1)))
+        return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(2)))
 
     def step(self, action):
         assert self.action_space.contains(action)
@@ -117,8 +120,10 @@ class OrbitDecayEnv(gym.Env):
                                            self.A, self.steps, self.dt, self.rho_multiplier)
         # Distance from target
         hd = np.abs(np.linalg.norm(self.r) - self.r_s)
+        # Vector distance from target velocity
+        vel = np.abs(np.linalg.norm(self.v) - self.orbit_v)
         # Create output state and scale to between -1 and 1
-        state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd]))
+        state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd, vel]))
 
         reward = 1.0
         done = False
@@ -150,41 +155,41 @@ def make_venv(rank, seed=0):
 def main():
     env = make_env()
     eval_env = make_env()
-    #vec_env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    vec_env = SubprocVecEnv([make_venv(i) for i in range(16)])
     data_path = './training_result/'
     ppo_callback = EvalCallback(eval_env, log_path=data_path + 'ppo/', n_eval_episodes=100, eval_freq=100000)
     a2c_callback = EvalCallback(eval_env, log_path=data_path + 'a2c/', n_eval_episodes=100, eval_freq=100000)
     acktr_callback = EvalCallback(eval_env, log_path=data_path + 'acktr/', n_eval_episodes=100, eval_freq=100000)
-    sac_callback = EvalCallback(eval_env, log_path=data_path + 'sac/', n_eval_episodes=100, eval_freq=10000)
+    sac_callback = EvalCallback(eval_env, log_path=data_path + 'sac/', n_eval_episodes=100, eval_freq=100000)
     td3_callback = EvalCallback(eval_env, log_path=data_path + 'td3/', n_eval_episodes=100, eval_freq=100000)
 
     n_actions = env.action_space.shape[-1]
     action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(n_actions), sigma=float(0.5) * np.ones(n_actions))
 
-    # model = PPO2(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
-    #              n_steps=256, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
-    # model.learn(total_timesteps=10000000, callback=ppo_callback,
-    #             tb_log_name='PPO2')
-    #
-    # model = A2C(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
-    #             ent_coef=0.001, gamma=0.999, lr_schedule='linear')
-    # model.learn(total_timesteps=10000000, callback=a2c_callback,
-    #             tb_log_name='A2C')
-    #
-    # model = ACKTR(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
-    #               gamma=0.99, n_steps=16, ent_coef=0.0, learning_rate=0.06)
-    # model.learn(total_timesteps=10000000, callback=acktr_callback,
-    #             tb_log_name='ACKTR')
+    model = PPO2(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
+                 n_steps=256, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
+    model.learn(total_timesteps=10000000, callback=ppo_callback,
+                tb_log_name='PPO2')
+    
+    model = A2C(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
+                ent_coef=0.001, gamma=0.999, lr_schedule='linear')
+    model.learn(total_timesteps=10000000, callback=a2c_callback,
+                tb_log_name='A2C')
+    
+    model = ACKTR(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
+                  gamma=0.99, n_steps=16, ent_coef=0.0, learning_rate=0.06)
+    model.learn(total_timesteps=10000000, callback=acktr_callback,
+                tb_log_name='ACKTR')
 
     model = SAC(SACMlpPolicy, env, verbose=1, tensorboard_log=data_path, batch_size=256, train_freq=1,
-                buffer_size=1000000, learning_starts=1000, ent_coef=0.005, gradient_steps=1, action_noise=action_noise)
+               buffer_size=1000000, learning_starts=1000, ent_coef=0.005, gradient_steps=1, action_noise=action_noise)
     model.learn(total_timesteps=500000, callback=sac_callback,
-                tb_log_name='SAC')
+               tb_log_name='SAC')
 
     model = TD3(TD3MlpPolicy, env, verbose=1, tensorboard_log=data_path,
-                buffer_size=1000000, learning_starts=1000, action_noise=action_noise)
+               buffer_size=1000000, learning_starts=1000, action_noise=action_noise)
     model.learn(total_timesteps=10000000, callback=td3_callback,
-                tb_log_name='TD3')
+               tb_log_name='TD3')
 
 
 def test(n):
@@ -195,10 +200,31 @@ def test(n):
         obs, rewards, dones, info = env.step([0.0, 0.0])
 
 
+def objective(trial: optuna.Trial):
+    gamma = trial.suggest_uniform('gamma', 0.99, 0.999)
+    learning_rate = trial.suggest_uniform('learning_rate', 0.00001, 0.001)
+    buffer_size = trial.suggest_categorical('buffer_size', [50000, 100000, 1000000])
+    batch_size = trial.suggest_categorical('batch_size', [32, 64, 128, 256, 512])
+    learning_start = trial.suggest_categorical('learning_start', [0, 100, 1000, 10000])
+    tau = trial.suggest_categorical('tau', [0.001, 0.005, 0.01, 0.02])
+    env = make_env()
+    model = SAC(SACMlpPolicy, env, verbose=1, batch_size=batch_size, learning_rate=learning_rate,
+               buffer_size=buffer_size, learning_starts=learning_start, gamma=gamma, tau=tau)
+    model.learn(total_timesteps=2000000)
+    return evaluate_policy(model, env, 100)[0]
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', default='0', help='If not set to 0, runs a test for n steps')
-    n = int(parser.parse_args().test)
+    parser.add_argument('--optuna', action='store_true', help='Activate Optuna')
+    args = parser.parse_args()
+
+    if args.optuna:
+        study = optuna.load_study(study_name='sac-optuna', storage='mysql://root:Ir8O8pEsy2Gx0ie0@34.72.24.157/study')
+        study.optimize(objective)
+
+    n = int(args.test)
     if n == 0:
         main()
     else:
