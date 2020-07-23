@@ -170,7 +170,7 @@ def main():
                  n_steps=256, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
     model.learn(total_timesteps=10000000, callback=ppo_callback,
                 tb_log_name='PPO2')
-    
+
     model = A2C(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
                 ent_coef=0.001, gamma=0.999, lr_schedule='linear')
     model.learn(total_timesteps=10000000, callback=a2c_callback,
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     if args.optuna:
         print('Optimizing SAC')
         study = optuna.load_study(study_name='sac-optuna', storage='mysql://root:Ir8O8pEsy2Gx0ie0@34.72.24.157/study')
-        study.optimize(objective)
+        study.optimize(objective, n_trials=100)
         exit(0)
 
     n = int(args.test)
