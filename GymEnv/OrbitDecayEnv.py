@@ -221,8 +221,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.optuna:
+        print('Optimizing SAC')
         study = optuna.load_study(study_name='sac-optuna', storage='mysql://root:Ir8O8pEsy2Gx0ie0@34.72.24.157/study')
         study.optimize(objective)
+        exit(0)
 
     n = int(args.test)
     if n == 0:
