@@ -5,6 +5,7 @@ from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.callbacks import EvalCallback
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
+from stable_baselines.common import set_global_seeds
 from gym.wrappers.time_limit import TimeLimit
 from stable_baselines import PPO2, SAC, TD3, A2C, ACKTR
 from gym.utils import seeding
@@ -175,15 +176,15 @@ def main():
                 ent_coef=0.001, gamma=0.999, lr_schedule='linear')
     model.learn(total_timesteps=10000000, callback=a2c_callback,
                 tb_log_name='A2C')
-    
+
     model = ACKTR(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
                   gamma=0.99, n_steps=16, ent_coef=0.0, learning_rate=0.06)
     model.learn(total_timesteps=10000000, callback=acktr_callback,
                 tb_log_name='ACKTR')
 
-    model = SAC(SACMlpPolicy, env, verbose=1, tensorboard_log=data_path, batch_size=256, train_freq=1,
-               buffer_size=1000000, learning_starts=1000, ent_coef=0.005, gradient_steps=1, action_noise=action_noise)
-    model.learn(total_timesteps=500000, callback=sac_callback,
+    model = SAC(SACMlpPolicy, env, verbose=1, tensorboard_log=data_path, batch_size=512, buffer_size=50000,
+                learning_starts=1000, tau=0.02, learning_rate=0.000141561, gamma=0.997784)
+    model.learn(total_timesteps=2000000, callback=sac_callback,
                tb_log_name='SAC')
 
     model = TD3(TD3MlpPolicy, env, verbose=1, tensorboard_log=data_path,
@@ -208,6 +209,8 @@ def objective(trial: optuna.Trial):
     learning_start = trial.suggest_categorical('learning_start', [0, 100, 1000, 10000])
     tau = trial.suggest_categorical('tau', [0.001, 0.005, 0.01, 0.02])
     env = make_env()
+    env.seed(100)
+    set_global_seeds(100)
     model = SAC(SACMlpPolicy, env, verbose=1, batch_size=batch_size, learning_rate=learning_rate,
                buffer_size=buffer_size, learning_starts=learning_start, gamma=gamma, tau=tau)
     model.learn(total_timesteps=2000000)
