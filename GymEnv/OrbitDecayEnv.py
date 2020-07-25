@@ -1,13 +1,10 @@
-from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
-from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
-from stable_baselines.common.noise import OrnsteinUhlenbeckActionNoise
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.callbacks import EvalCallback
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import set_global_seeds
 from gym.wrappers.time_limit import TimeLimit
-from stable_baselines import PPO2, SAC, TD3, A2C, ACKTR
+from stable_baselines import PPO2
 from gym.utils import seeding
 from gym import spaces
 from numba import njit
@@ -73,18 +70,20 @@ class OrbitDecayEnv(gym.Env):
     }
 
     def __init__(self):
-        self.h = 5.5E5             # Height of satellite 550 km in meters
-        self.r_e = 6.371E6          # Radius of earth in meters
-        self.r_s = self.h + self.r_e
-        self.m = 100.0             # Mass of satellite
-        self.dt = 1.0               # Delta t
-        self.GM = 3.986004418E14    # Earth's gravitational parameter
-        self.C_d = 2.123            # Drag coefficient
-        self.A = 1.0                # Surface area normal to velocity
-        self.F_t = 0.02              # Force of thrust
-        self.steps = 1           # Step per dt
-        self.threshold = 1          # Threshold to end episode
-        self.rho_multiplier = 10000     # Rho is multiplied by this amount
+        self.h = 5.5E5               # Height of satellite 550 km in meters
+        self.r_e = 6.371E6           # Radius of earth in meters
+        self.r_s = self.h + self.r_e # Radius from center of earth
+        self.m = 100.0               # Mass of satellite
+        self.mp = 75.0               # Mass of propellant
+        self.dt = 1.0                # Delta t
+        self.GM = 3.986004418E14     # Earth's gravitational parameter
+        self.C_d = 2.123             # Drag coefficient
+        self.A = 1.0                 # Surface area normal to velocity
+        self.F_t = 0.04              # Force of thrust
+        self.steps = 1               # Step per dt
+        self.threshold = 1           # Threshold to end episode
+        self.rho_multiplier = 10000  # Rho is multiplied by this amount
+        self.step_fuel = 250         # Number of steps for fuel to run out, when at full thrust
         self.orbit_v = np.sqrt(self.GM / self.r_s)
         # Some state vectors
         self.r = np.zeros(2)
@@ -103,6 +102,7 @@ class OrbitDecayEnv(gym.Env):
         return [seed]
 
     def reset(self):
+        self.step_fuel_used = 0.0
         self.r = np.array([
             self.r_s,
             0
@@ -125,10 +125,15 @@ class OrbitDecayEnv(gym.Env):
         vel = np.abs(np.linalg.norm(self.v) - self.orbit_v)
         # Create output state and scale to between -1 and 1
         state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd, vel]))
+        # Calculate fuel used
+        self.step_fuel_used += thrust
 
         reward = 1.0
         done = False
         if hd > self.threshold:
+            reward = 0.0
+            done = True
+        if self.step_fuel_used > self.step_fuel:
             reward = 0.0
             done = True
 
@@ -154,43 +159,17 @@ def make_venv(rank, seed=0):
 
 
 def main():
-    env = make_env()
-    eval_env = make_env()
-    vec_env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    env_eval = make_env()
+    env.seed(100)
+    set_global_seeds(100)
     data_path = './training_result/'
-    ppo_callback = EvalCallback(eval_env, log_path=data_path + 'ppo/', n_eval_episodes=100, eval_freq=100000)
-    a2c_callback = EvalCallback(eval_env, log_path=data_path + 'a2c/', n_eval_episodes=100, eval_freq=100000)
-    acktr_callback = EvalCallback(eval_env, log_path=data_path + 'acktr/', n_eval_episodes=100, eval_freq=100000)
-    sac_callback = EvalCallback(eval_env, log_path=data_path + 'sac/', n_eval_episodes=100, eval_freq=100000)
-    td3_callback = EvalCallback(eval_env, log_path=data_path + 'td3/', n_eval_episodes=100, eval_freq=100000)
+    ppo_callback = EvalCallback(env_eval, log_path=data_path + 'ppo/', n_eval_episodes=100, eval_freq=100000)
 
-    n_actions = env.action_space.shape[-1]
-    action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(n_actions), sigma=float(0.5) * np.ones(n_actions))
-
-    model = PPO2(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
+    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
                  n_steps=256, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
     model.learn(total_timesteps=10000000, callback=ppo_callback,
                 tb_log_name='PPO2')
-
-    model = A2C(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
-                ent_coef=0.001, gamma=0.999, lr_schedule='linear')
-    model.learn(total_timesteps=10000000, callback=a2c_callback,
-                tb_log_name='A2C')
-
-    model = ACKTR(MlpPolicy, vec_env, verbose=1, tensorboard_log=data_path,
-                  gamma=0.99, n_steps=16, ent_coef=0.0, learning_rate=0.06)
-    model.learn(total_timesteps=10000000, callback=acktr_callback,
-                tb_log_name='ACKTR')
-
-    model = SAC(SACMlpPolicy, env, verbose=1, tensorboard_log=data_path, batch_size=512, buffer_size=50000,
-                learning_starts=1000, tau=0.02, learning_rate=0.000141561, gamma=0.997784)
-    model.learn(total_timesteps=2000000, callback=sac_callback,
-               tb_log_name='SAC')
-
-    model = TD3(TD3MlpPolicy, env, verbose=1, tensorboard_log=data_path,
-               buffer_size=1000000, learning_starts=1000, action_noise=action_noise)
-    model.learn(total_timesteps=10000000, callback=td3_callback,
-               tb_log_name='TD3')
 
 
 def test(n):
@@ -202,18 +181,23 @@ def test(n):
 
 
 def objective(trial: optuna.Trial):
-    gamma = trial.suggest_uniform('gamma', 0.99, 0.999)
-    learning_rate = trial.suggest_uniform('learning_rate', 0.00001, 0.001)
-    buffer_size = trial.suggest_categorical('buffer_size', [50000, 100000, 1000000])
-    batch_size = trial.suggest_categorical('batch_size', [32, 64, 128, 256, 512])
-    learning_start = trial.suggest_categorical('learning_start', [0, 100, 1000, 10000])
-    tau = trial.suggest_categorical('tau', [0.001, 0.005, 0.01, 0.02])
-    env = make_env()
-    env.seed(100)
+    n_steps = trial.suggest_categorical('n_steps' ,[32, 64, 128, 256, 512, 1024, 2048])
+    nminibatches = trial.suggest_categorical('nminibatches', [1, 4, 8, 32, 64, 128])
+    noptepochs = trial.suggest_categorical('noptepochs', [4, 10, 20])
+    lam = trial.suggest_uniform('lam', 0.8, 0.95)
+    gamma = trial.suggest_uniform('gamma', 0.98, 0.999)
+    learning_rate = trial.suggest_loguniform('learning_rate', 3e-4, 0.001)
+    ent_coef = trial.suggest_uniform('ent_coef', 0.0,  0.01)
+    cliprange = trial.suggest_uniform('cliprange', 0.01, 0.2)
+    total_timesteps = trial.suggest_categorical('total_timesteps', [100000, 1000000, 2000000, 5000000, 10000000])
+
     set_global_seeds(100)
-    model = SAC(SACMlpPolicy, env, verbose=1, batch_size=batch_size, learning_rate=learning_rate,
-               buffer_size=buffer_size, learning_starts=learning_start, gamma=gamma, tau=tau)
-    model.learn(total_timesteps=2000000)
+    env = SubprocVecEnv([make_venv(i) for i in range(16)])
+
+    model = PPO2(MlpPolicy, env, verbose=1, n_steps=n_steps, nminibatches=nminibatches, noptepochs=noptepochs,
+                 lam=lam, gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef, cliprange=cliprange)
+    model.learn(total_timesteps)
+
     return evaluate_policy(model, env, 100)[0]
 
 
@@ -224,8 +208,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.optuna:
-        print('Optimizing SAC')
-        study = optuna.load_study(study_name='sac-optuna', storage='mysql://root:Ir8O8pEsy2Gx0ie0@34.72.24.157/study')
+        print('Optimizing PPO')
+        study = optuna.load_study(study_name='ppo-optuna-1', storage='mysql://root:Ir8O8pEsy2Gx0ie0@34.72.24.157/study')
         study.optimize(objective, n_trials=100)
         exit(0)
 
