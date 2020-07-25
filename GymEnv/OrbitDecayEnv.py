@@ -167,7 +167,7 @@ def main():
     ppo_callback = EvalCallback(env_eval, log_path=data_path + 'ppo/', n_eval_episodes=100, eval_freq=100000)
 
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
-                 n_steps=256, nminibatches=32, lam=0.98, gamma=0.999, noptepochs=4)
+                 n_steps=256, nminibatches=32, lam=0.98, gamma=0.99, noptepochs=4)
     model.learn(total_timesteps=10000000, callback=ppo_callback,
                 tb_log_name='PPO2')
 
@@ -189,7 +189,7 @@ def objective(trial: optuna.Trial):
     learning_rate = trial.suggest_loguniform('learning_rate', 3e-4, 0.001)
     ent_coef = trial.suggest_uniform('ent_coef', 0.0,  0.01)
     cliprange = trial.suggest_uniform('cliprange', 0.01, 0.2)
-    total_timesteps = trial.suggest_categorical('total_timesteps', [100000, 1000000, 2000000, 5000000, 10000000])
+    total_timesteps = 5000000
 
     set_global_seeds(100)
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
