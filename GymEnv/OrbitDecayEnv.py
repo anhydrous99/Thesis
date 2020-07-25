@@ -193,12 +193,13 @@ def objective(trial: optuna.Trial):
 
     set_global_seeds(100)
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
+    env_eval = make_env()
 
     model = PPO2(MlpPolicy, env, verbose=1, n_steps=n_steps, nminibatches=nminibatches, noptepochs=noptepochs,
                  lam=lam, gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef, cliprange=cliprange)
     model.learn(total_timesteps)
 
-    return evaluate_policy(model, env, 100)[0]
+    return evaluate_policy(model, env_eval, 100)[0]
 
 
 if __name__ == '__main__':
