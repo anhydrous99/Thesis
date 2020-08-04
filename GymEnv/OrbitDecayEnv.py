@@ -88,7 +88,8 @@ class OrbitDecayEnv(gym.Env):
         # Some state vectors
         self.r = np.zeros(2)
         self.v = np.zeros(2)
-        high = np.array([1, 1, 1, 1, self.threshold, 1], dtype=np.float32)
+        self.theta = 0
+        high = np.array([1, 1, 1, 1, self.threshold, 1, np.pi], dtype=np.float32)
         low = -high
         low[4] = 0
         low[5] = 0
@@ -111,20 +112,23 @@ class OrbitDecayEnv(gym.Env):
             0,
             self.orbit_v
         ])
-        return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(2)))
+        self.theta = 0
+        return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(2), [self.theta]))
 
     def step(self, action):
         assert self.action_space.contains(action)
         thrust = action[0]
-        angle = action[1] * 2 * np.pi
-        self.r, self.v = calculate_physics(self.r, self.v, thrust, angle, self.F_t, self.r_e, self.GM, self.m, self.C_d,
+        angle_delta = action[1] * np.pi / 4 - np.pi / 8
+        self.theta += angle_delta
+        self.theta -= (2 * np.pi) * np.floor((self.theta + np.pi) * (1 / (2 * np.pi)))
+        self.r, self.v = calculate_physics(self.r, self.v, thrust, self.theta, self.F_t, self.r_e, self.GM, self.m, self.C_d,
                                            self.A, self.steps, self.dt, self.rho_multiplier)
         # Distance from target
         hd = np.abs(np.linalg.norm(self.r) - self.r_s)
         # Vector distance from target velocity
         vel = np.abs(np.linalg.norm(self.v) - self.orbit_v)
         # Create output state and scale to between -1 and 1
-        state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd, vel]))
+        state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd, vel, self.theta]))
         # Calculate fuel used
         self.step_fuel_used += thrust
 
@@ -168,7 +172,7 @@ def main():
 
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
                  n_steps=256, nminibatches=32, lam=0.98, gamma=0.99, noptepochs=4)
-    model.learn(total_timesteps=10000000, callback=ppo_callback,
+    model.learn(total_timesteps=100000000, callback=ppo_callback,
                 tb_log_name='PPO2')
 
 
