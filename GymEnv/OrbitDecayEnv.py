@@ -89,10 +89,12 @@ class OrbitDecayEnv(gym.Env):
         self.r = np.zeros(2)
         self.v = np.zeros(2)
         self.theta = 0
-        high = np.array([1, 1, 1, 1, self.threshold, 1, np.pi], dtype=np.float32)
+        self.thrust = 0.0
+        high = np.array([1, 1, 1, 1, self.threshold, 1, np.pi, 1], dtype=np.float32)
         low = -high
         low[4] = 0
         low[5] = 0
+        low[7] = 0
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
         self.action_space = spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.viewer = None
@@ -113,24 +115,25 @@ class OrbitDecayEnv(gym.Env):
             self.orbit_v
         ])
         self.theta = 0
-        return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(2), [self.theta]))
+        self.thrust = 0.0
+        return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(2), [self.theta, self.thrust]))
 
     def step(self, action):
         assert self.action_space.contains(action)
-        thrust = action[0]
-        angle_delta = action[1] * np.pi / 4 - np.pi / 8
-        self.theta += angle_delta
+        self.thrust += action[0] * 0.08 - 0.04
+        self.thrust = np.clip(self.thrust, 0.0, 1.0)
+        self.theta += action[1] * np.pi / 3 - np.pi / 6
         self.theta -= (2 * np.pi) * np.floor((self.theta + np.pi) * (1 / (2 * np.pi)))
-        self.r, self.v = calculate_physics(self.r, self.v, thrust, self.theta, self.F_t, self.r_e, self.GM, self.m, self.C_d,
+        self.r, self.v = calculate_physics(self.r, self.v, self.thrust, self.theta, self.F_t, self.r_e, self.GM, self.m, self.C_d,
                                            self.A, self.steps, self.dt, self.rho_multiplier)
         # Distance from target
         hd = np.abs(np.linalg.norm(self.r) - self.r_s)
         # Vector distance from target velocity
         vel = np.abs(np.linalg.norm(self.v) - self.orbit_v)
         # Create output state and scale to between -1 and 1
-        state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd, vel, self.theta]))
+        state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd, vel, self.theta, self.thrust]))
         # Calculate fuel used
-        self.step_fuel_used += thrust
+        self.step_fuel_used += self.thrust
 
         reward = 1.0
         done = False
@@ -214,7 +217,7 @@ if __name__ == '__main__':
 
     if args.optuna:
         print('Optimizing PPO')
-        study = optuna.load_study(study_name='ppo-optuna-1', storage='mysql://root:Ir8O8pEsy2Gx0ie0@34.72.24.157/study')
+        study = optuna.load_study(study_name='PPO_study', storage='mysql://anhydrous99:eeQstj5b9K@161.35.126.61/anhydrous99')
         study.optimize(objective, n_trials=100)
         exit(0)
 
