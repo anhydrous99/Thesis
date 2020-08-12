@@ -4,6 +4,7 @@ from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import set_global_seeds
 from gym.wrappers.time_limit import TimeLimit
+from DataCallback import DataCallback
 from stable_baselines import PPO2
 from gym.utils import seeding
 from gym import spaces
@@ -171,11 +172,11 @@ def main():
     env.seed(100)
     set_global_seeds(100)
     data_path = './training_result/'
-    ppo_callback = EvalCallback(env_eval, log_path=data_path + 'ppo/', n_eval_episodes=100, eval_freq=100000)
+    ppo_callback = DataCallback(env_eval, 10000, data_path + 'data.csv')
 
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
                  n_steps=256, nminibatches=32, lam=0.98, gamma=0.99, noptepochs=4)
-    model.learn(total_timesteps=100000000, callback=ppo_callback,
+    model.learn(total_timesteps=30000000, callback=ppo_callback,
                 tb_log_name='PPO2')
 
 
