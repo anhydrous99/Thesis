@@ -1,5 +1,4 @@
 from stable_baselines.common.evaluation import evaluate_policy
-from stable_baselines.common.callbacks import EvalCallback
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import set_global_seeds
