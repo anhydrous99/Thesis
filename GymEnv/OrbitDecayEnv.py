@@ -188,7 +188,7 @@ def test(n):
 
 
 def objective(trial: optuna.Trial):
-    n_steps = trial.suggest_categorical('n_steps' ,[32, 64, 128, 256, 512, 1024, 2048])
+    n_steps = 256
     nminibatches = trial.suggest_categorical('nminibatches', [1, 4, 8, 32, 64, 128])
     noptepochs = trial.suggest_categorical('noptepochs', [4, 10, 20])
     lam = trial.suggest_uniform('lam', 0.8, 0.95)
@@ -196,7 +196,7 @@ def objective(trial: optuna.Trial):
     learning_rate = trial.suggest_loguniform('learning_rate', 3e-4, 0.001)
     ent_coef = trial.suggest_uniform('ent_coef', 0.0,  0.01)
     cliprange = trial.suggest_uniform('cliprange', 0.01, 0.2)
-    total_timesteps = 5000000
+    total_timesteps = 10000000
 
     set_global_seeds(100)
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
