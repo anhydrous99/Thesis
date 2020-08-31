@@ -1,0 +1,69 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[utf8]{inputenc}
+
+\title{Artificial Intelligence to Reinforcement Learning}
+\author{Armando Herrera}
+
+\begin{document}
+\maketitle
+
+Here I'll go over the fundamentals of Neural Network and Machine Learning as well as the some applications and practical applications. Then I'll go over the fundamentals of Reinforcement Learning from the typical formalism to some of the latest methods and algorithms.
+
+Before we even go over neural network, I do believe in having a strong foundation in the subject and a clear mathematical formalism. This allows for a subject's mathematical description of methods to speak to us in a clear and understandable language forming a clear picture.
+
+\section{Introductory Mathematics}
+
+\subsection{Formalism}
+
+In this paper, I heavily rely on the formalism typically expressed in linear algebra textbooks. This allows me to relay the most important information, intuitively, while preserving exactness.
+
+To describe a scalar, mathematically, a standard letter a used. For instance $a=1$, where I assign the variable $a$ the scalar value of $1$. To describe a vector, an arrow is placed above a variable to denote it as a vector, $\vec{v}=\vec{0}$ denotes a variable $\vec{v}$ assigned the zero vector. A vector can be described as an element of n-dimensional Euclidean Space where each element of the vector denotes an axis of said space. $$\vec{x}=\begin{bmatrix}1 & 2 & 3\end{bmatrix}$$ is an example vector in 3 dimensional euclidean space. This same vector is denoted as a row-wise vector, where all the elements of the vector are on a single row, a column-wise vector would look like $$\vec{x}=\begin{bmatrix}1 \\ 2 \\ 3\end{bmatrix}.$$ The significance of the distinctions between a row-wise and column-wise vector are show when going over the matrix as in some operations they have different results and making a distinction matters. From now on when a vector is shown and is not other wise said assume the vector is in column-wise form. 
+
+Another form that a vector can be expressed in is via summation notation. In this notation, we must first define the following unit vectors, $$\hat{r}_1=\begin{bmatrix}1 \\ 0 \\ \vdots \\ 0\end{bmatrix},\hat{r}_2=\begin{bmatrix}0 \\ 1 \\ \vdots \\ 0\end{bmatrix},\dots,\hat{r}_n=\begin{bmatrix}0 \\ 0 \\ \vdots \\ 1\end{bmatrix} .$$ Each element of said vector can then be denoted as $$\vec{x}=x_1 \hat{r}_1 + x_2 \hat{r}_2 + \dots + x_n \hat{r}_n$$ and finally using sigma notation, $$\vec{x}=\sum_{i=1}^n x_i \hat{r}_i.$$ This notation is important to properly display information and proofs that would be difficult to display using the previously show forms. One example proof is the proof for the vector's associativity axiom, $\vec{u}+(\vec{v}+\vec{w})=(\vec{u}+\vec{v})+\vec{w}$.
+\begin{proof}
+\begin{align*}
+\vec{u}+(\vec{v}+\vec{w})&=(\vec{u}+\vec{v})+\vec{w} \\
+&=\bigg(\sum_{i=1}^nu_i \hat{r}_i+\sum_{j=1}^n v_j \hat{r}_j\bigg)+\sum_{k=1}^n w_k \hat{r}_k\\
+&=\sum_{i=1}^n (u_i\hat{r}_i + v_i\hat{r}_i) + w_i\hat{r}_i\\
+&=\sum_{i=1}^n \big((u_i + v_i) + w_i\big)r_i\\
+&=\sum_{i=1}^n \big(u_i+(v_i+w_i)\big)r_i&\text{scalar's associativity}\\
+&=\vec{u}+(\vec{v}+\vec{w})
+\end{align*}
+\end{proof}
+
+\subsection{Matrix Operations}
+
+
+\section{Classic Methods}
+
+\subsection{Naive Bayes}
+
+\subsection{Support Vector Machines}
+
+
+\section{Neural Networks}
+
+\subsection{Feed-Forward Networks}
+
+\subsection{Recurrent Networks}
+
+\subsection{Convolution Networks}
+
+
+\section{Reinforcement Learning}
+
+\subsection{Cross-Entropy Method}
+
+\subsection{Q-Learning}
+
+\subsection{TRPO}
+
+\subsection{DQN}
+
+\subsection{PPO}
+
+\end{document}
