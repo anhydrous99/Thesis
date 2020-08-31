@@ -189,8 +189,8 @@ def test(n):
 
 def objective(trial: optuna.Trial):
     n_steps = 256
-    nminibatches = trial.suggest_categorical('nminibatches', [1, 4, 8, 32, 64, 128])
-    noptepochs = trial.suggest_categorical('noptepochs', [4, 10, 20])
+    nminibatches = 32
+    noptepochs = 4
     lam = trial.suggest_uniform('lam', 0.8, 0.95)
     gamma = trial.suggest_uniform('gamma', 0.98, 0.999)
     learning_rate = trial.suggest_loguniform('learning_rate', 3e-4, 0.001)
