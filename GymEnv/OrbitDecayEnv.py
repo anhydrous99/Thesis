@@ -70,20 +70,20 @@ class OrbitDecayEnv(gym.Env):
     }
 
     def __init__(self):
-        self.h = 5.5E5               # Height of satellite 550 km in meters
-        self.r_e = 6.371E6           # Radius of earth in meters
-        self.r_s = self.h + self.r_e # Radius from center of earth
-        self.m = 100.0               # Mass of satellite
-        self.mp = 75.0               # Mass of propellant
-        self.dt = 1.0                # Delta t
-        self.GM = 3.986004418E14     # Earth's gravitational parameter
-        self.C_d = 2.123             # Drag coefficient
-        self.A = 1.0                 # Surface area normal to velocity
-        self.F_t = 0.04              # Force of thrust
-        self.steps = 1               # Step per dt
-        self.threshold = 1           # Threshold to end episode
-        self.rho_multiplier = 10000  # Rho is multiplied by this amount
-        self.step_fuel = 250         # Number of steps for fuel to run out, when at full thrust
+        self.h = 5.5E5                # Height of satellite 550 km in meters
+        self.r_e = 6.371E6            # Radius of earth in meters
+        self.r_s = self.h + self.r_e  # Radius from center of earth
+        self.m = 100.0                # Mass of satellite
+        self.mp = 75.0                # Mass of propellant
+        self.dt = 1.0                 # Delta t
+        self.GM = 3.986004418E14      # Earth's gravitational parameter
+        self.C_d = 2.123              # Drag coefficient
+        self.A = 1.0                  # Surface area normal to velocity
+        self.F_t = 0.04               # Force of thrust
+        self.steps = 1                # Step per dt
+        self.threshold = 1            # Threshold to end episode
+        self.rho_multiplier = 10000   # Rho is multiplied by this amount
+        self.step_fuel = 125          # Number of steps for fuel to run out, when at full thrust
         self.orbit_v = np.sqrt(self.GM / self.r_s)
         # Some state vectors
         self.r = np.zeros(2)
@@ -98,6 +98,7 @@ class OrbitDecayEnv(gym.Env):
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
         self.action_space = spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.viewer = None
+        self.current_step = 0
         self.seed()
 
     def seed(self, seed=None):
@@ -116,11 +117,12 @@ class OrbitDecayEnv(gym.Env):
         ])
         self.theta = 0
         self.thrust = 0.0
+        self.current_step = 0
         return np.concatenate((self.r / self.r_s, self.v / self.orbit_v, np.zeros(2), [self.theta, self.thrust]))
 
     def step(self, action):
         assert self.action_space.contains(action)
-        self.thrust += action[0] * 0.08 - 0.04
+        self.thrust += action[0] * 0.06 - 0.03
         self.thrust = np.clip(self.thrust, 0.0, 1.0)
         self.theta += action[1] * np.pi / 3 - np.pi / 6
         self.theta -= (2 * np.pi) * np.floor((self.theta + np.pi) * (1 / (2 * np.pi)))
@@ -135,7 +137,8 @@ class OrbitDecayEnv(gym.Env):
         # Calculate fuel used
         self.step_fuel_used += self.thrust
 
-        reward = 1.0
+        reward = self.current_step / 800.0 + 0.5
+
         done = False
         if hd > self.threshold:
             reward = 0.0
@@ -144,6 +147,7 @@ class OrbitDecayEnv(gym.Env):
             reward = 0.0
             done = True
 
+        self.current_step += 1
         return state, reward, done, {}
 
     def render(self, mode='human'):
