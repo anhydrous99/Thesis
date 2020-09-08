@@ -29,7 +29,9 @@ class DataCallback(BaseCallback):
                     if done:
                         break
                 rewards.append(episode_reward)
-            self.data.append({'i': self.step_count, 'avg': np.average(rewards), 'std': np.std(rewards)})
+            d = {'i': self.step_count, 'avg': np.average(rewards), 'std': np.std(rewards)}
+            self.data.append(d)
+            print(d)
         self.step_count += 1
         return True
 

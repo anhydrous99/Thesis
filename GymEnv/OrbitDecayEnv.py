@@ -2,6 +2,7 @@ from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import set_global_seeds
+from stable_baselines.common.callbacks import EvalCallback, CallbackList
 from gym.wrappers.time_limit import TimeLimit
 from DataCallback import DataCallback
 from stable_baselines import PPO2
@@ -122,7 +123,7 @@ class OrbitDecayEnv(gym.Env):
 
     def step(self, action):
         assert self.action_space.contains(action)
-        self.thrust += action[0] * 0.06 - 0.03
+        self.thrust += action[0] * 0.04 - 0.02
         self.thrust = np.clip(self.thrust, 0.0, 1.0)
         self.theta += action[1] * np.pi / 3 - np.pi / 6
         self.theta -= (2 * np.pi) * np.floor((self.theta + np.pi) * (1 / (2 * np.pi)))
@@ -171,16 +172,20 @@ def make_venv(rank, seed=0):
 
 def main():
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
-    env_eval = make_env()
+    env_eval1 = make_env()
+    env_eval2 = make_env()
     env.seed(100)
     set_global_seeds(100)
     data_path = './training_result/'
-    ppo_callback = DataCallback(env_eval, 10000, data_path + 'data.csv')
+    ppo_callback = DataCallback(env_eval1, 10000, data_path + 'data.csv')
+    eval_callback = EvalCallback(env_eval2, best_model_save_path='./logs',
+                                 log_path='./logs/', eval_freq=10000, n_eval_episodes=100,
+                                 deterministic=True, render=False)
+    callback = CallbackList([ppo_callback, eval_callback])
 
-    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path,
-                 n_steps=256, nminibatches=32, lam=0.98, gamma=0.99, noptepochs=4)
-    model.learn(total_timesteps=30000000, callback=ppo_callback,
-                tb_log_name='PPO2')
+    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path, ent_coef=0.0,
+                 n_steps=256, nminibatches=8, lam=0.94, gamma=0.99, noptepochs=4)
+    model.learn(total_timesteps=10000000, callback=callback, tb_log_name='PPO2')
 
 
 def test(n):
@@ -193,7 +198,7 @@ def test(n):
 
 def objective(trial: optuna.Trial):
     n_steps = 256
-    nminibatches = 32
+    nminibatches = 8
     noptepochs = 4
     lam = trial.suggest_uniform('lam', 0.8, 0.95)
     gamma = trial.suggest_uniform('gamma', 0.98, 0.999)
