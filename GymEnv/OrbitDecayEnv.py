@@ -226,7 +226,7 @@ if __name__ == '__main__':
 
     if args.optuna:
         print('Optimizing PPO')
-        study = optuna.load_study(study_name='PPO_study2', storage='mysql://anhydrous99:eeQstj5b9K@161.35.126.61/anhydrous99')
+        study = optuna.load_study(study_name='PPO_study3', storage='mysql://anhydrous99:eeQstj5b9K@161.35.126.61/anhydrous99')
         study.optimize(objective, n_trials=100)
         exit(0)
 
