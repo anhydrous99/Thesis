@@ -177,16 +177,16 @@ def main():
     env.seed(100)
     set_global_seeds(100)
     data_path = './training_result/'
-    ppo_callback = DataCallback(env_eval1, 10000, data_path + 'data.csv')
+    ppo_callback = DataCallback(env_eval1, 5000, data_path + 'data.csv', data_path + 'plot.png')
     eval_callback = EvalCallback(env_eval2, best_model_save_path='./logs',
-                                 log_path='./logs/', eval_freq=10000, n_eval_episodes=100,
+                                 log_path='./logs/', eval_freq=5000, n_eval_episodes=100,
                                  deterministic=True, render=False)
     callback = CallbackList([ppo_callback, eval_callback])
 
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path, ent_coef=0.00217048,
                  n_steps=256, nminibatches=8, lam=0.917588, gamma=0.988211, noptepochs=4,
                  cliprange=0.0418092, learning_rate=0.000657861)
-    model.learn(total_timesteps=10000000, callback=callback, tb_log_name='PPO2')
+    model.learn(total_timesteps=20000000, callback=callback, tb_log_name='PPO2')
 
 
 def test(n):

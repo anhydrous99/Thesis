@@ -5,10 +5,11 @@ import numpy as np
 
 
 class DataCallback(BaseCallback):
-    def __init__(self, eval_env, n_steps, file_name, n_episodes=100, plot=True, verbose=0):
+    def __init__(self, eval_env, n_steps, file_name, plot_name=None, n_episodes=100, plot=True, verbose=0):
         super(DataCallback, self).__init__(verbose)
         self.data = []
         self.model = None
+        self.plot_name = plot_name
         self.step_count = 0
         self.n_steps = n_steps
         self.eval_env = eval_env
@@ -40,4 +41,6 @@ class DataCallback(BaseCallback):
         if self.plot:
             df['avg'].plot()
             plt.show()
+            if self.plot_name is not None:
+                plt.savefig(self.plot_name)
         df.to_csv(self.file_name)
