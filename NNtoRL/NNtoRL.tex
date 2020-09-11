@@ -5,6 +5,11 @@
 \usepackage{amsthm}
 \usepackage[utf8]{inputenc}
 
+\usepackage{mathtools}
+\usepackage{tabularx}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
 \title{Artificial Intelligence to Reinforcement Learning}
 \author{Armando Herrera}
 
@@ -37,10 +42,47 @@ Another form that a vector can be expressed in is via summation notation. In thi
 
 \subsection{Matrix Operations}
 
+In this section, I will go over the common matrix operations that are used in Machine Learning. Firstly, a matrix is basically a table of mathematical expression or numbers arranged in columns and rows. For example, $$A=\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}.$$ Both row vectors and column vectors can be seen as matrices with a single row or a single column.
+
+\subsubsection{Component-wise Operations}
+
+Component wise operations like multiplication, addition, and subtraction can be denoted on a per component basis. $$(A\square B)_{ij}=A_{ij} \square B_{ij}$$
+
+The $\square$ symbols represent the different possible component-wise operations like multiplication, add, subtraction, and even division.
+
+\subsubsection{Matrix Multiplication}
+
+Matrix Multiplication is the most heavily used operation in Machine Learning. It's definition is simple, in summation notation, $$(AB)_{ij}=\sum_{k=1}^n A_{ik}B_{kj}.$$
+
+\subsubsection{Kronecker Product}
+
+Kronecker is a little less known but extremely use product that makes mathematical definitions in machine learning simpler. It is defined as $$(A\otimes B)_{ij}=A_{\floor{(i-1)/p}+1,\floor{(j-1)/q}+1}B_{(i-1)\%p+1,(j-1)\%q+1}.$$ A matrix with dimensions $p\times q$ will result in a matrix of dimensions $pm\times qn$.
+
+\section{The Agent and it's Environment}
+
+According to "Artificial Intelligence: A Modern Approach" by Russel and Norvig an agent as "anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators." For instance, an autonomous car will have the roads and the area around the roads as it's environment, it perceives through the various IR, radar, and visual sensors around the car. The autonomous car will interact with it's environment through it's various actuators, the accelerator, the brake, and the steering. 
+
+In terms of the environment I will be describing the agent will be a satellite that is orbiting a pseudo-earth with a heavier atmosphere, to simulate an accelerated orbital decay. This is acceleration is because the forces of orbital decay are fairly minute so, in order to create an agent in a reasonable amount of time with reasonable amount of computational resources this is done. Of course, this is a hyper-parameter that can be changed in the future to continue research into creating a more long-term agent.  
+
+The satellite's actuators is would be it's engines which generate thrust and it's angle of thrust. The goal of the agent would then be to try it's best to maintain it's orbit. The performance measure would be a function of the amount of time it stays within a certain threshold from it's orbit altitude. A more detailed and mathematical description is explained in a later section.
+
+\begin{table}
+\caption{A simple description of the environment.}
+\begin{tabularx}{\columnwidth}{|X||X|X|X|X|} \hline
+Agent Type & Performance Measure & Environment & Actuators & Sensors \\ \hline
+Satellite  & How long the satellite is able to maintain it's orbit with the amount of fuel it has. & 
+Low Earth Orbit & The engine and it's angle of thrust. & Relative position, velocity data with respect to earth and it's target orbit, as well as it's current angle and thrust. \\ \hline
+\end{tabularx}
+\end{table}
+
 
 \section{Classic Methods}
 
+Before we dive into ML then RL we need to have a strong foundation in the Classical Methods which makes analysis of ML methods easier and simpler. A house needs a strong foundation. Of course, I'll go over them in passing as they can be examined in detail.
+
 \subsection{Naive Bayes}
+
+
 
 \subsection{Support Vector Machines}
 
