@@ -42,21 +42,41 @@ Another form that a vector can be expressed in is via summation notation. In thi
 
 \subsection{Matrix Operations}
 
-In this section, I will go over the common matrix operations that are used in Machine Learning. Firstly, a matrix is basically a table of mathematical expression or numbers arranged in columns and rows. For example, $$A=\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}.$$ Both row vectors and column vectors can be seen as matrices with a single row or a single column.
+In this section, I will go over the common matrix operations that are used in Machine Learning. Firstly, a matrix is basically a table of mathematical expression or numbers arranged in columns and rows. For example, $$A=\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}.$$ Both row vectors and column vectors can be seen as matrices with a single row or a single column. In this paper, when ever a letter is capitalized it means that it represent a matrix. When a matrix is show as $[A]_{ij}$ this means we are talking about the element in the $i$th row and the $j$th column.
 
 \subsubsection{Component-wise Operations}
 
-Component wise operations like multiplication, addition, and subtraction can be denoted on a per component basis. $$(A\square B)_{ij}=A_{ij} \square B_{ij}$$
+Component wise operations like multiplication, addition, and subtraction can be denoted on a per component basis. $$[A\square B]_{ij}=[A]_{ij} \square [B]_{ij}$$
 
 The $\square$ symbols represent the different possible component-wise operations like multiplication, add, subtraction, and even division.
 
 \subsubsection{Matrix Multiplication}
 
-Matrix Multiplication is the most heavily used operation in Machine Learning. It's definition is simple, in summation notation, $$(AB)_{ij}=\sum_{k=1}^n A_{ik}B_{kj}.$$
+Matrix Multiplication is the most heavily used operation in Machine Learning. It's definition is simple, in summation notation, $$[AB]_{ij}=\sum_{k=1}^n [A]_{ik}[B]_{kj}.$$
 
 \subsubsection{Kronecker Product}
 
-Kronecker is a little less known but extremely use product that makes mathematical definitions in machine learning simpler. It is defined as $$(A\otimes B)_{ij}=A_{\floor{(i-1)/p}+1,\floor{(j-1)/q}+1}B_{(i-1)\%p+1,(j-1)\%q+1}.$$ A matrix with dimensions $p\times q$ will result in a matrix of dimensions $pm\times qn$.
+Kronecker is a little less known but extremely use product that makes mathematical definitions in machine learning simpler. It is defined as $$[A\otimes B]_{ij}=[A]_{\floor{(i-1)/p}+1,\floor{(j-1)/q}+1}[B]_{(i-1)\%p+1,(j-1)\%q+1}.$$ A matrix with dimensions $p\times q$ will result in a matrix of dimensions $pm\times qn$.
+
+\subsubsection{Matrix Transpose}
+
+The transpose operation is also used extensively. It is defined as $$[A^T]_{ij}=[A]_{ji}.$$
+
+\subsection{Vector Operations}
+
+Since vectors can be represented as single rowed or single columned matrices we can borrow some of the operations, for instance the component-wise operations. 
+
+The Dot Product is defined as $$\vec{a}\cdot \vec{b}=\sum_{i=1}^n a_i b_i.$$ Notice, the Dot Product basically is Matrix Multiplication between two vectors, one in the form of a row vector and the other as a column vector. 
+
+\begin{proof}
+\begin{align*}
+\vec{a}\cdot \vec{b}&=\vec{a}\vec{b}^T\\
+&=\begin{bmatrix}a_1 & a_2 & \dots \end{bmatrix}
+\begin{bmatrix}b_1 \\ b_2 \\ \vdots \end{bmatrix}\\
+&=\sum_{i=1}^na_i b_i \\
+&=\vec{a}\cdot \vec{b}
+\end{align*}
+\end{proof}
 
 \section{The Agent and it's Environment}
 
@@ -75,21 +95,18 @@ Low Earth Orbit & The engine and it's angle of thrust. & Relative position, velo
 \end{tabularx}
 \end{table}
 
-
-\section{Classic Methods}
-
-Before we dive into ML then RL we need to have a strong foundation in the Classical Methods which makes analysis of ML methods easier and simpler. A house needs a strong foundation. Of course, I'll go over them in passing as they can be examined in detail.
-
-\subsection{Naive Bayes}
-
-
-
-\subsection{Support Vector Machines}
-
+The environment is static single-agent fully observable sequential and continuous. Static in that the agent doesn't have to keep cognizant while it is deliberating. Single-agent, while the environment can be expanded to accommodate multiple agent to accelerate training to keep it simple it is a single-agent environment. It is sequential where the agent's experience cannot be divided into atomic episodes and every time step requires the last. Finally, it is continuous as the position, velocity, and other attributes are continuous. The actions of thrust and angle will be continuous. 
 
 \section{Neural Networks}
 
-\subsection{Feed-Forward Networks}
+The history of neural networks goes back to the 1940 but was really popularized with the perceptron in the 50s and 60s where the perceptron was implemented on an IBM 704.
+
+\subsection{Perceptrons}
+
+In the simplest of thinking a perceptron simply is a single-layer neural network. It basically is a piecewise function where a weights $w$ and bias $b$ determine the output. $$f(\vec{x})=\begin{cases}
+1 \mbox{ if } \vec{w}\cdot \vec{x}+b>0 \\
+0 \mbox{ otherwise }
+\end{cases}$$ Where $\vec{w}$  is the weight vector, $b$ is the bias, and $x$ is the input vector. 
 
 \subsection{Recurrent Networks}
 
