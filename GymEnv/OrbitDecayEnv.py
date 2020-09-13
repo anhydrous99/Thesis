@@ -183,9 +183,9 @@ def main():
                                  deterministic=True, render=False)
     callback = CallbackList([ppo_callback, eval_callback])
 
-    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path, ent_coef=0.00217048,
-                 n_steps=256, nminibatches=8, lam=0.917588, gamma=0.988211, noptepochs=4,
-                 cliprange=0.0418092, learning_rate=0.000657861)
+    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path, ent_coef=0.00377952,
+                 n_steps=256, nminibatches=8, lam=0.944959, gamma=0.994404, noptepochs=4,
+                 cliprange=0.0343517, learning_rate=0.000819363)
     model.learn(total_timesteps=20000000, callback=callback, tb_log_name='PPO2')
 
 

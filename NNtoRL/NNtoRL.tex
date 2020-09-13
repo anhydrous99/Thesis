@@ -64,7 +64,7 @@ The transpose operation is also used extensively. It is defined as $$[A^T]_{ij}=
 
 \subsection{Vector Operations}
 
-Since vectors can be represented as single rowed or single columned matrices we can borrow some of the operations, for instance the component-wise operations. 
+Both single rowed, and single columned matrices are vectors, which means we can borrow some of the operations, for instance, the component-wise operations.
 
 The Dot Product is defined as $$\vec{a}\cdot \vec{b}=\sum_{i=1}^n a_i b_i.$$ Notice, the Dot Product basically is Matrix Multiplication between two vectors, one in the form of a row vector and the other as a column vector. 
 
@@ -80,11 +80,11 @@ The Dot Product is defined as $$\vec{a}\cdot \vec{b}=\sum_{i=1}^n a_i b_i.$$ Not
 
 \section{The Agent and it's Environment}
 
-According to "Artificial Intelligence: A Modern Approach" by Russel and Norvig an agent as "anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators." For instance, an autonomous car will have the roads and the area around the roads as it's environment, it perceives through the various IR, radar, and visual sensors around the car. The autonomous car will interact with it's environment through it's various actuators, the accelerator, the brake, and the steering. 
+According to "Artificial Intelligence: A Modern Approach" by Russel and Norvig an agent as "anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators." For instance, an autonomous car will have the roads, and the area around the roads as the environment perceives through the various IR, radar, and visual sensors around the car. The autonomous car will interact with the environment through its various actuators, the accelerator, the brake, and the steering. 
 
-In terms of the environment I will be describing the agent will be a satellite that is orbiting a pseudo-earth with a heavier atmosphere, to simulate an accelerated orbital decay. This is acceleration is because the forces of orbital decay are fairly minute so, in order to create an agent in a reasonable amount of time with reasonable amount of computational resources this is done. Of course, this is a hyper-parameter that can be changed in the future to continue research into creating a more long-term agent.  
+In terms of the environment, I will describe the agent as a satellite that is orbiting a pseudo-earth with a heavier atmosphere, to simulate an accelerated orbital decay. The orbital decay is accelerated because the orbital decay forces are relatively minute, so creating an agent in a reasonable amount of time with a reasonable amount of computational resources is done. Of course, this is a hyper-parameter that can be changed in the future to continue research into creating a more long-term agent.  
 
-The satellite's actuators is would be it's engines which generate thrust and it's angle of thrust. The goal of the agent would then be to try it's best to maintain it's orbit. The performance measure would be a function of the amount of time it stays within a certain threshold from it's orbit altitude. A more detailed and mathematical description is explained in a later section.
+The satellite's actuators are its engines that generate thrust and its angle of thrust. The goal of the agent would then be to try its best to maintain its orbit. The performance measure would be a function of the amount of time it stays within a certain threshold from its orbit altitude. A more detailed and mathematical description is explained in a later section.
 
 \begin{table}
 \caption{A simple description of the environment.}
@@ -95,7 +95,7 @@ Low Earth Orbit & The engine and it's angle of thrust. & Relative position, velo
 \end{tabularx}
 \end{table}
 
-The environment is static single-agent fully observable sequential and continuous. Static in that the agent doesn't have to keep cognizant while it is deliberating. Single-agent, while the environment can be expanded to accommodate multiple agent to accelerate training to keep it simple it is a single-agent environment. It is sequential where the agent's experience cannot be divided into atomic episodes and every time step requires the last. Finally, it is continuous as the position, velocity, and other attributes are continuous. The actions of thrust and angle will be continuous. 
+The environment is static, single-agent, fully observable sequential, and continuous. Static in that the agent does not have to keep cognizant while it is deliberating. Single-agent, while the environment is expanded to accommodate multiple agents to accelerate training to keep it simple, it is a single-agent environment. It is sequential where the agent's experience cannot be divided into atomic episodes, and every time step requires the last. Finally, it is continuous as the position, velocity, and other attributes are continuous. The actions of thrust and angle will be continuous. 
 
 \section{Neural Networks}
 
