@@ -54,15 +54,11 @@ The $\square$ symbols represent the different possible component-wise operations
 
 Matrix Multiplication is the most heavily used operation in Machine Learning. It's definition is simple, in summation notation, $$[AB]_{ij}=\sum_{k=1}^n [A]_{ik}[B]_{kj}.$$
 
-\subsubsection{Kronecker Product}
-
-Kronecker is a little less known but extremely use product that makes mathematical definitions in machine learning simpler. It is defined as $$[A\otimes B]_{ij}=[A]_{\floor{(i-1)/p}+1,\floor{(j-1)/q}+1}[B]_{(i-1)\%p+1,(j-1)\%q+1}.$$ A matrix with dimensions $p\times q$ will result in a matrix of dimensions $pm\times qn$.
-
 \subsubsection{Matrix Transpose}
 
 The transpose operation is also used extensively. It is defined as $$[A^T]_{ij}=[A]_{ji}.$$
 
-\subsection{Vector Operations}
+\subsection{Dot Product}
 
 Both single rowed, and single columned matrices are vectors, which means we can borrow some of the operations, for instance, the component-wise operations.
 
@@ -106,12 +102,33 @@ The history of neural networks goes back to the 1940 but was really popularized 
 In the simplest of thinking a perceptron simply is a single-layer neural network. It basically is a piecewise function where a weights $w$ and bias $b$ determine the output. $$f(\vec{x})=\begin{cases}
 1 \mbox{ if } \vec{w}\cdot \vec{x}+b>0 \\
 0 \mbox{ otherwise }
-\end{cases}$$ Where $\vec{w}$  is the weight vector, $b$ is the bias, and $x$ is the input vector. 
+\end{cases}$$ Where $\vec{w}$  is the weight vector, $b$ is the bias, and $x$ is the input vector.  Perceptrons are a powerful concept since n-Dimensional clusters can be linearly separated. A great example where perceptrons are extremely helpful is with logical operators. A single perceptron can mimic most logical operators except for XOR; Multiple perceptrons can mimick XOR. Since the perceptron is a linear classifier, the perceptron will fail if a cluster is not linearly separable. 
 
-\subsection{Recurrent Networks}
+One example of a logical operator that a perceptron can mimic is the AND function. The AND function is only true when both both inputs are true. Let true be one and false be zero, then if $\vec{w}=\begin{bmatrix}1 \\ 1\end{bmatrix}$ and $b=-1.5$ then the perceptron will only output one when both inputs are one.
 
-\subsection{Convolution Networks}
+\subsection{Feed-forward Neural Networks}
 
+We can classify Feed-forward Neural Networks into several categories. One of these categories, the simplest, is the Single Neuron Single Input Network. 
+$$a(x)=f(wx + b)|_{w.b}$$
+$w$ and $b$ are weight constants, and $f$ is a transfer function that can be linear or non-linear function and whose purpose is to turn input information into output info—for example, turning input data into 0s and 1s using the piecewise function, thereby turning into a perceptron. A Single Neuron Multiple Input Neural Network is the next simplest. Here, the Neural Network can be described similarly as the perceptron except for the additional function variable, $$a(\vec{x})=f(\vec{w}\cdot \vec{x}+b).$$ The next most straightforward form of the Neural Network is the Neural Network layer, where a Neural Network has multiple inputs and multiple neurons, resulting in multiple output values, or an output vector. 
+$$\vec{a}(\vec{x})=\vec{f}(W\vec{x}+\vec{b})$$ Where $W\vec{x}$ is the Matrix-Vector Multiplication, $$[W\vec{x}]_i=\sum_{j=1}^n [W]_{ij}[\vec{x}]_{j}.$$ 
+
+A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an output layer, and any number of hidden layers. Using the equations so far, it is then possible to build these FNNs. Let us consider this FNN with an arbitrary number of layers, $m$, and an arbitrary number of Neurons per layer. The layer is then 
+\begin{align*}
+&\text{First Layer} \\
+\vec{a}_1 &= f_1(W_1\vec{x} +\vec{b}_1 )\\
+&\vdots\\
+\vec{a}_i &= f_i(W_i\vec{a}_{i-1}+\vec{b}_i)\\
+&\vdots\\
+\vec{a}_m &= f_m(W_m\vec{a}_{m-1}+\vec{b}_m)\\
+\end{align*}
+
+\section{Back-Propagation, SGD, and ADAM}
+
+Back-Propagation is a specific case of Automatic Differentiation (AD). AD is a Differentiation technique that takes advantage of the fact that computers evaluate expression sequentially. This fact allows for the repeated application of the chain rule. While being similar to both Symbolic Differentiation and Numerical Differentiation, it is neither. Both classical methods of differentiation are comparatively slow at calculating the gradient to complicated functions. 
+
+The chain rule, in calculus, is a formula to calculate the derivative of a composite function. If two functions, $f$ and $g$ are composite, that composite function is $h$, and $h$'s dependent variable is $x$ then the chain rule defined as 
+$$\frac{dh(x)}{dx}=\frac{d}{dx}(f(g(x)))=\frac{df}{dg}\bigg|_{g(x)}\cdot\frac{dg}{dx}\bigg|_{x}.$$
 
 \section{Reinforcement Learning}
 
