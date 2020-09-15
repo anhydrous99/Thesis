@@ -123,12 +123,27 @@ A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an
 \vec{a}_m &= f_m(W_m\vec{a}_{m-1}+\vec{b}_m)\\
 \end{align*}
 
+\subsection{Loss and Activation Functions}
+
 \section{Back-Propagation, SGD, and ADAM}
 
 Back-Propagation is a specific case of Automatic Differentiation (AD). AD is a Differentiation technique that takes advantage of the fact that computers evaluate expression sequentially. This fact allows for the repeated application of the chain rule. While being similar to both Symbolic Differentiation and Numerical Differentiation, it is neither. Both classical methods of differentiation are comparatively slow at calculating the gradient to complicated functions. 
 
 The chain rule, in calculus, is a formula to calculate the derivative of a composite function. If two functions, $f$ and $g$ are composite, that composite function is $h$, and $h$'s dependent variable is $x$ then the chain rule defined as 
-$$\frac{dh(x)}{dx}=\frac{d}{dx}(f(g(x)))=\frac{df}{dg}\bigg|_{g(x)}\cdot\frac{dg}{dx}\bigg|_{x}.$$
+$$\frac{dh(x)}{dx}=\frac{d}{dx}(f(g(x)))=\frac{df}{dg}\bigg|_{g(x)}\cdot\frac{dg}{dx}\bigg|_{x}.$$ Forwards and Backwards accumulation of the computation graph is allowed using the chain rule. Many great tools exist to calculate this create and use these computation graphs via a GradientTape to calculate the gradient of arbitrary functions like PyTorch or Tensorflow python libraries.
+
+\subsection{Stochastic Gradient Descent}
+
+The Stochastic Gradient Descent (SGD) is a stochastic approximation of the Gradient Descent algorithm that finds the minimum or optimizes a function. In the SGD algorithm, calculate the gradient resulting from a single randomly picked sample, then multiply it by a learning rate, hyper-parameter between 0 and 1, then add it to the weights to biases. $$\vec{x}=\vec{x}-\gamma\nabla \vec{f}(\vec{x})$$ Applying Back-propagation and SGD to Neural Networks if the mean square error is used as the loss-function. results in 
+\begin{align*}
+W_{m}(k+1)&=W_{m}(k)-\alpha \vec{s}_m (\vec{a}_{m-1})^T\\
+\vec{b}_m(k+1)&=\vec{b}_{m}(k)-\alpha \vec{s}_m
+\end{align*} where
+\begin{align*}
+s_{M}&=-2\dot{F}_M(\vec{n}_M)(\vec{t}-\vec{a})\\
+s_m&=\dot{F}_m(\vec{n}_m)(W_{m+1})^T s^{m+1}\\
+\dot{F}(\vec{n}_m)&=I\dot{f}(\vec{n}_m)^T
+\end{align*} and $I$ is the square  identity matrix.
 
 \section{Reinforcement Learning}
 
