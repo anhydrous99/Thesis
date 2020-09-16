@@ -136,11 +136,11 @@ Loss functions turn the raw output of a neural network into something trainable 
 Back-Propagation is a specific case of Automatic Differentiation (AD). AD is a Differentiation technique that takes advantage of the fact that computers evaluate expression sequentially. This fact allows for the repeated application of the chain rule. While being similar to both Symbolic Differentiation and Numerical Differentiation, it is neither. Both classical methods of differentiation are comparatively slow at calculating the gradient to complicated functions. 
 
 The chain rule, in calculus, is a formula to calculate the derivative of a composite function. If two functions, $f$ and $g$ are composite, that composite function is $h$, and $h$'s dependent variable is $x$ then the chain rule defined as 
-$$\frac{dh(x)}{dx}=\frac{d}{dx}(f(g(x)))=\frac{df}{dg}\bigg|_{g(x)}\cdot\frac{dg}{dx}\bigg|_{x}.$$ Forwards and Backwards accumulation of the computation graph is allowed using the chain rule. Many great tools exist to calculate this create and use these computation graphs via a GradientTape to calculate the gradient of arbitrary functions like PyTorch or Tensorflow python libraries.
+$$\frac{dh(x)}{dx}=\frac{d}{dx}(f(g(x)))=\frac{df}{dg}\bigg|_{g(x)}\cdot\frac{dg}{dx}\bigg|_{x}.$$ Forwards and Backwards accumulation of the computation graph is allowed using the chain rule. Many great tools exist to calculate this create and use these computation graphs via a GradientTape to calculate the gradient of arbitrary functions like PyTorch or Tensorflow python libraries. These library's GradientTape allows for the easy calculation of the gradient without laborious manual calculation of Back-propagation.
 
 \subsection{Stochastic Gradient Descent}
 
-The Stochastic Gradient Descent (SGD) is a stochastic approximation of the Gradient Descent algorithm that finds the minimum or optimizes a function. In the SGD algorithm, calculate the gradient resulting from a single randomly picked sample, then multiply it by a learning rate, hyper-parameter between 0 and 1, then add it to the weights to biases. $$\vec{x}=\vec{x}-\gamma\nabla \vec{f}(\vec{x})$$ Applying Back-propagation and SGD to Neural Networks if the mean square error is used as the loss-function. results in 
+The Stochastic Gradient Descent (SGD) is a stochastic approximation of the Gradient Descent algorithm that finds the minimum or optimizes a function. In the SGD algorithm, calculate the gradient resulting from a single randomly picked sample, then multiply it by a learning rate, hyper-parameter between 0 and 1, then add it to the weights to biases. $$\vec{w}=\vec{w}-\gamma\nabla \vec{f}(\vec{x})$$ Applying Back-propagation and SGD to Neural Networks if the mean square error is used as the loss-function. results in 
 \begin{align*}
 W_{m}(k+1)&=W_{m}(k)-\gamma \vec{s}_m (\vec{a}_{m-1})^T\\
 \vec{b}_m(k+1)&=\vec{b}_{m}(k)-\gamma \vec{s}_m
@@ -152,6 +152,14 @@ s_m&=\dot{F}_m(\vec{n}_m)(W_{m+1})^T s^{m+1}\\
 \end{align*} $I$ is the square identity matrix, and $m=M-1,\dots, 2, 1$ or for each layer, in reverse. As said before, the $s_M$ variable presented here is for the mean squared error loss function.
 
 \subsection{ADAM}
+
+What makes the Adam algorithm so popular is its robustness to changes in its hyper-parameters. It does this by keeping a single learning rate and an adaptive learning rate for different parameters calculated from a first and second gradient moments or moving averages of the gradient. Adam combines two algorithms. AdaGrad and RMSprop, combining their advantages over SGD. It has a couple of extra hyper-parameters, including $\beta_1$, $\beta_2$, and $\epsilon$. $\beta_1$ and $\beta_2$ are hyper-parameters that deal with the two moments, and $\epsilon$ improves numerical stability. IT is calculated by first calculating the current running average, \begin{align*}
+	k_m(t+1)&\leftarrow \beta_1 k_m(t)+(1-\beta_1)\nabla \vec{f}(\vec{x})\\
+	v_m(t+1)&\leftarrow \beta_2 v_m(t)+(1-\beta_2)(\nabla \vec{f}(\vec{x}))^2\\
+	\hat{k}_m&=\frac{k_m(t+1)}{1-\beta_1^{t+1}}\\
+	\hat{v}_m&=\frac{v_m(t+1)}{1-\beta_2^{t+1}},
+\end{align*} then update the weights, 
+$$w_m(t+1)\leftarrow w_m(t)-\gamma\frac{\hat{k}_m}{\sqrt{\hat{v_m}}+\epsilon}.$$
 
 \section{Reinforcement Learning}
 
