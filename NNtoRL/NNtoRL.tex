@@ -129,7 +129,7 @@ Loss and Activation functions are an essential part of the Neural Network Archit
 
 The activation function, in the context of the definition above, is $f_i$. These functions, as I have said before, allow for the non-linearity of the Neural Network. A couple of typically used functions is the cosine, tangent, ReLU, Leaky ReLU, the logistic function, and many others. Each of these different functions has different properties, which makes each function perfect for a particular scenario. For example, in a Convolutional Neural Network, which typically is deep or has many layers, the ReLU or Leaky ReLU function is used as they help prevent the vanishing or exploding gradient problems.
 
-Loss functions
+Loss functions turn the raw output of a neural network into something trainable by an optimization algorithm. These loss functions measure the error between the desired value and the value produced by a neural network. One might ask, why not use the accuracy to train? Unfortunately, since the accuracy function is not differentiable, it cannot be used as a loss function and train a neural network. Some typical functions are the mean square error or the l2-loss, the l1-loss, the hinge loss function, the cross-entropy loss, the negative log-likelihood, and many more.
 
 \section{Back-Propagation, SGD, and ADAM}
 
@@ -150,6 +150,8 @@ s_{M}&=-2\dot{F}_M(\vec{n}_M)(\vec{t}-\vec{a})\\
 s_m&=\dot{F}_m(\vec{n}_m)(W_{m+1})^T s^{m+1}\\
 \dot{F}(\vec{n}_m)&=I\dot{f}(\vec{n}_m)^T,
 \end{align*} $I$ is the square identity matrix, and $m=M-1,\dots, 2, 1$ or for each layer, in reverse. As said before, the $s_M$ variable presented here is for the mean squared error loss function.
+
+\subsection{ADAM}
 
 \section{Reinforcement Learning}
 
