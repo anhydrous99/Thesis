@@ -74,25 +74,6 @@ The Dot Product is defined as $$\vec{a}\cdot \vec{b}=\sum_{i=1}^n a_i b_i.$$ Not
 \end{align*}
 \end{proof}
 
-\section{The Agent and it's Environment}
-
-According to "Artificial Intelligence: A Modern Approach" by Russel and Norvig an agent as "anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators." For instance, an autonomous car will have the roads, and the area around the roads as the environment perceives through the various IR, radar, and visual sensors around the car. The autonomous car will interact with the environment through its various actuators, the accelerator, the brake, and the steering. 
-
-In terms of the environment, I will describe the agent as a satellite that is orbiting a pseudo-earth with a heavier atmosphere, to simulate an accelerated orbital decay. The orbital decay is accelerated because the orbital decay forces are relatively minute, so creating an agent in a reasonable amount of time with a reasonable amount of computational resources is done. Of course, this is a hyper-parameter that can be changed in the future to continue research into creating a more long-term agent.  
-
-The satellite's actuators are its engines that generate thrust and its angle of thrust. The goal of the agent would then be to try its best to maintain its orbit. The performance measure would be a function of the amount of time it stays within a certain threshold from its orbit altitude. A more detailed and mathematical description is explained in a later section.
-
-\begin{table}
-\caption{A simple description of the environment.}
-\begin{tabularx}{\columnwidth}{|X||X|X|X|X|} \hline
-Agent Type & Performance Measure & Environment & Actuators & Sensors \\ \hline
-Satellite  & How long the satellite is able to maintain it's orbit with the amount of fuel it has. & 
-Low Earth Orbit & The engine and it's angle of thrust. & Relative position, velocity data with respect to earth and it's target orbit, as well as it's current angle and thrust. \\ \hline
-\end{tabularx}
-\end{table}
-
-The environment is static, single-agent, fully observable sequential, and continuous. Static in that the agent does not have to keep cognizant while it is deliberating. Single-agent, while the environment is expanded to accommodate multiple agents to accelerate training to keep it simple, it is a single-agent environment. It is sequential where the agent's experience cannot be divided into atomic episodes, and every time step requires the last. Finally, it is continuous as the position, velocity, and other attributes are continuous. The actions of thrust and angle will be continuous. 
-
 \section{Neural Networks}
 
 The history of neural networks goes back to the 1940 but was really popularized with the perceptron in the 50s and 60s where the perceptron was implemented on an IBM 704.
@@ -163,13 +144,47 @@ $$w_m(t+1)\leftarrow w_m(t)-\gamma\frac{\hat{k}_m}{\sqrt{\hat{v_m}}+\epsilon}.$$
 
 \section{Reinforcement Learning}
 
+According to "Artificial Intelligence: A Modern Approach" by Russel and Norvig an agent as "anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators." For instance, an autonomous car will have the roads, and the area around the roads as the environment perceives through the various IR, radar, and visual sensors around the car. The autonomous car will interact with the environment through its various actuators, the accelerator, the brake, and the steering. 
+
+In terms of the environment, I will describe the agent as a satellite that is orbiting a pseudo-earth with a heavier atmosphere, to simulate an accelerated orbital decay. The orbital decay is accelerated because the orbital decay forces are relatively minute, so creating an agent in a reasonable amount of time with a reasonable amount of computational resources is done. Of course, this is a hyper-parameter that can be changed in the future to continue research into creating a more long-term agent.  
+
+The satellite's actuators are its engines that generate thrust and its angle of thrust. The goal of the agent would then be to try its best to maintain its orbit. The performance measure would be a function of the amount of time it stays within a certain threshold from its orbit altitude. A more detailed and mathematical description is explained in a later section.
+
+\begin{table}
+\caption{A simple description of the environment.}
+\begin{tabularx}{\columnwidth}{|X||X|X|X|X|} \hline
+Agent Type & Performance Measure & Environment & Actuators & Sensors \\ \hline
+Satellite  & How long the satellite is able to maintain it's orbit with the amount of fuel it has. & 
+Low Earth Orbit & The engine and it's angle of thrust. & Relative position, velocity data with respect to earth and it's target orbit, as well as it's current angle and thrust. \\ \hline
+\end{tabularx}
+\end{table}
+
+The environment is static, single-agent, fully observable sequential, and continuous. Static in that the agent does not have to keep cognizant while it is deliberating. Single-agent, while the environment is expanded to accommodate multiple agents to accelerate training to keep it simple, it is a single-agent environment. It is sequential where the agent's experience cannot be divided into atomic episodes, and every time step requires the last. Finally, it is continuous as the position, velocity, and other attributes are continuous. The actions of thrust and angle will be continuous. 
+
+Markov chains are stochastic models that describe possible events in a system where the probability of an event only depends on the current state. Markov reward process, an extension of Markov chains, add a reward to each state, and all past states' rewards are accumulated. There would be an immediate reward $R$ and an accumulated reward $G$ for every step in these Markov processes. An episode is then the set of states from the initial state to the terminal state, and here the episodic reward is $G$.
+
+Most Reinforcement Learning environments or tasks are Markov Decision Processes (MDPs). The basic premise behind MDPs is an initial state where, after taking a step, the system stochastically arrives at another state. These are stochastic processes where an action or a state change has uncertainty. An MDP example is a robotic plane with two states, stable and unstable, and two actions to increase or decrease the throttle. If the plane goes too fast, there is a change it could go into the unstable state, but if it goes too slow, there is also a chance it could go into the unstable state. As with Markov chains, Markov reward processes extend MDPs to include the rewards.
+A 5-tuple can mathematically define the extended MDPs, $$(S, A, P_a, R_a, \gamma).$$ Here $S$ are the state, $A$ the actions, $P_a(s',s)$ is the probability that action $a$ will result with action $s'$, and $R_a(s,s')$ is the immediate reward from the transition, resulting from action $a$, between states $s$ and $s'$. Finally, $\gamma$ is the reward discount factor. The accumulated reward at time $t$, $G_t$, is calculated by $$G_t\equiv \sum_{k=1}^\infty \gamma^k R_{t+k+1}.$$ As shown in the above equation, the gamma parameter is a direct measure of foresight. Its value can be between $0$ and $1$, but its typical value is between $0.99$ and $0.999$.
+
+Next, we need to look for a solution, the set of actions to take, which maximizes the reward. This solution is called a policy, which is typically denoted by $\pi$. $\pi(a|s)$ would then be a probability distribution of actions by the said policy concerning state $s$. 
+
+An essential part of RL and RL algorithms is the value of state, or, as is said in some literature, the state-action pair. Since the accumulated reward for a single Markov reward process is not very useful, as it can vary significantly between chains, the value is the average of many of these chains. Therefore, it is the expected accumulated reward starting form the state then act according to a policy $\pi$. $$V(s)=\mathbb{E}[G|S_t=s]$$ 
+
+\subsection{Taxonomy}
+
+There are two main categories of RL algorithms, Model-Free, and Model-Based algorithms. The main distinguishing factor between these two categories is whether the agent has access to a model of the environment. A model of the environment could be a function that predicts the state transitions and rewards.
+
+The model, within the Model-Based algorithm, is beneficial to the agent as it allows it to plan, thinking ahead, and evaluate the different action it could take—the result is a policy with experience from the different possible paths. An example is AlphaGo Zero, which utilizes the breathtaking Monte Carlo tree search (MCTS) algorithm. However, soldomly do we have access to the model function that the agent could use. In turn, if it wants to plane and formulate plans without access to the model, it would have to learn the model. One such algorithm is called MuZero, which can learn the rules of the games it plays, match the performance of AlphaZero, and achieve "state-of-the-art" performance in many Atari games. Leading to the two sub-categories under Model-Based Algorithms, Learned, and build-in model algorithms.
+
+Under Model-Free algorithms, there are two sub-categories, Policy Optimization and Q-Learning based algorithms. Since the 
+
 \subsection{Cross-Entropy Method}
 
 \subsection{Q-Learning}
 
-\subsection{TRPO}
-
 \subsection{DQN}
+
+\subsection{TRPO}
 
 \subsection{PPO}
 
