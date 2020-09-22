@@ -1,0 +1,173 @@
+\chapter{Reinforcement Learning}\label{ch:RL}
+
+Here I'll go over the fundamentals of Neural Network and Machine Learning as well as the some applications and practical applications. Then I'll go over the fundamentals of Reinforcement Learning from the typical formalism to some of the latest methods and algorithms.
+
+Before we even go over neural network, I do believe in having a strong foundation in the subject and a clear mathematical formalism. This allows for a subject's mathematical description of methods to speak to us in a clear and understandable language forming a clear picture.
+
+\section{Introductory Mathematics}
+
+\subsection{Formalism}
+
+In this paper, I heavily rely on the formalism typically expressed in linear algebra textbooks. This allows me to relay the most important information, intuitively, while preserving exactness.
+
+To describe a scalar, mathematically, a standard letter a used. For instance $a=1$, where I assign the variable $a$ the scalar value of $1$. To describe a vector, an arrow is placed above a variable to denote it as a vector, $\vec{v}=\vec{0}$ denotes a variable $\vec{v}$ assigned the zero vector. A vector can be described as an element of n-dimensional Euclidean Space where each element of the vector denotes an axis of said space. $$\vec{x}=\begin{bmatrix}1 & 2 & 3\end{bmatrix}$$ is an example vector in 3 dimensional euclidean space. This same vector is denoted as a row-wise vector, where all the elements of the vector are on a single row, a column-wise vector would look like $$\vec{x}=\begin{bmatrix}1 \\ 2 \\ 3\end{bmatrix}.$$ The significance of the distinctions between a row-wise and column-wise vector are show when going over the matrix as in some operations they have different results and making a distinction matters. From now on when a vector is shown and is not other wise said assume the vector is in column-wise form. 
+
+Another form that a vector can be expressed in is via summation notation. In this notation, we must first define the following unit vectors, $$\hat{r}_1=\begin{bmatrix}1 \\ 0 \\ \vdots \\ 0\end{bmatrix},\hat{r}_2=\begin{bmatrix}0 \\ 1 \\ \vdots \\ 0\end{bmatrix},\dots,\hat{r}_n=\begin{bmatrix}0 \\ 0 \\ \vdots \\ 1\end{bmatrix} .$$ Each element of said vector can then be denoted as $$\vec{x}=x_1 \hat{r}_1 + x_2 \hat{r}_2 + \dots + x_n \hat{r}_n$$ and finally using sigma notation, $$\vec{x}=\sum_{i=1}^n x_i \hat{r}_i.$$ This notation is important to properly display information and proofs that would be difficult to display using the previously show forms. One example proof is the proof for the vector's associativity axiom, $\vec{u}+(\vec{v}+\vec{w})=(\vec{u}+\vec{v})+\vec{w}$.
+\begin{proof}
+\begin{align*}
+\vec{u}+(\vec{v}+\vec{w})&=(\vec{u}+\vec{v})+\vec{w} \\
+&=\bigg(\sum_{i=1}^nu_i \hat{r}_i+\sum_{j=1}^n v_j \hat{r}_j\bigg)+\sum_{k=1}^n w_k \hat{r}_k\\
+&=\sum_{i=1}^n (u_i\hat{r}_i + v_i\hat{r}_i) + w_i\hat{r}_i\\
+&=\sum_{i=1}^n \big((u_i + v_i) + w_i\big)r_i\\
+&=\sum_{i=1}^n \big(u_i+(v_i+w_i)\big)r_i&\text{scalar's associativity}\\
+&=\vec{u}+(\vec{v}+\vec{w})
+\end{align*}
+\end{proof}
+
+\subsection{Matrix Operations}
+
+In this section, I will go over the common matrix operations that are used in Machine Learning. Firstly, a matrix is basically a table of mathematical expression or numbers arranged in columns and rows. For example, $$A=\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}.$$ Both row vectors and column vectors can be seen as matrices with a single row or a single column. In this paper, when ever a letter is capitalized it means that it represent a matrix. When a matrix is show as $[A]_{ij}$ this means we are talking about the element in the $i$th row and the $j$th column.
+
+\subsubsection{Component-wise Operations}
+
+Component wise operations like multiplication, addition, and subtraction can be denoted on a per component basis. $$[A\square B]_{ij}=[A]_{ij} \square [B]_{ij}$$
+
+The $\square$ symbols represent the different possible component-wise operations like multiplication, add, subtraction, and even division.
+
+\subsubsection{Matrix Multiplication}
+
+Matrix Multiplication is the most heavily used operation in Machine Learning. It's definition is simple, in summation notation, $$[AB]_{ij}=\sum_{k=1}^n [A]_{ik}[B]_{kj}.$$
+
+\subsubsection{Matrix Transpose}
+
+The transpose operation is also used extensively. It is defined as $$[A^T]_{ij}=[A]_{ji}.$$
+
+\subsection{Dot Product}
+
+Both single rowed, and single columned matrices are vectors, which means we can borrow some of the operations, for instance, the component-wise operations.
+
+The Dot Product is defined as $$\vec{a}\cdot \vec{b}=\sum_{i=1}^n a_i b_i.$$ Notice, the Dot Product basically is Matrix Multiplication between two vectors, one in the form of a row vector and the other as a column vector. 
+
+\begin{proof}
+\begin{align*}
+\vec{a}\cdot \vec{b}&=\vec{a}\vec{b}^T\\
+&=\begin{bmatrix}a_1 & a_2 & \dots \end{bmatrix}
+\begin{bmatrix}b_1 \\ b_2 \\ \vdots \end{bmatrix}\\
+&=\sum_{i=1}^na_i b_i \\
+&=\vec{a}\cdot \vec{b}
+\end{align*}
+\end{proof}
+
+\section{Neural Networks}
+
+The history of neural networks goes back to the 1940 but was really popularized with the perceptron in the 50s and 60s where the perceptron was implemented on an IBM 704.
+
+\subsection{Perceptrons}
+
+In the simplest of thinking a perceptron simply is a single-layer neural network. It basically is a piecewise function where a weights $w$ and bias $b$ determine the output. $$f(\vec{x})=\begin{cases}
+1 \mbox{ if } \vec{w}\cdot \vec{x}+b>0 \\
+0 \mbox{ otherwise }
+\end{cases}$$ Where $\vec{w}$  is the weight vector, $b$ is the bias, and $x$ is the input vector.  Perceptrons are a powerful concept since n-Dimensional clusters can be linearly separated. A great example where perceptrons are extremely helpful is with logical operators. A single perceptron can mimic most logical operators except for XOR; Multiple perceptrons can mimick XOR. Since the perceptron is a linear classifier, the perceptron will fail if a cluster is not linearly separable. 
+
+One example of a logical operator that a perceptron can mimic is the AND function. The AND function is only true when both both inputs are true. Let true be one and false be zero, then if $\vec{w}=\begin{bmatrix}1 \\ 1\end{bmatrix}$ and $b=-1.5$ then the perceptron will only output one when both inputs are one.
+
+\subsection{Feed-forward Neural Networks}
+
+We can classify Feed-forward Neural Networks into several categories. One of these categories, the simplest, is the Single Neuron Single Input Network. 
+$$a(x)=f(wx + b)|_{w.b}$$
+$w$ and $b$ are weight constants, and $f$ is a transfer function that can be linear or non-linear function and whose purpose is to turn input information into output info—for example, turning input data into 0s and 1s using the piecewise function, thereby turning into a perceptron. A Single Neuron Multiple Input Neural Network is the next simplest. Here, the Neural Network can be described similarly as the perceptron except for the additional function variable, $$a(\vec{x})=f(\vec{w}\cdot \vec{x}+b).$$ The next most straightforward form of the Neural Network is the Neural Network layer, where a Neural Network has multiple inputs and multiple neurons, resulting in multiple output values, or an output vector. 
+$$\vec{a}(\vec{x})=\vec{f}(W\vec{x}+\vec{b})$$ Where $W\vec{x}$ is the Matrix-Vector Multiplication, $$[W\vec{x}]_i=\sum_{j=1}^n [W]_{ij}[\vec{x}]_{j}.$$ 
+
+A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an output layer, and any number of hidden layers. Using the equations so far, it is then possible to build these FNNs. Let us consider this FNN with an arbitrary number of layers, $m$, and an arbitrary number of Neurons per layer. The layer is then 
+\begin{align*}
+&\text{First Layer} \\
+\vec{a}_1 &= f_1(W_1\vec{x} +\vec{b}_1 )\\
+&\vdots\\
+\vec{a}_i &= f_i(W_i\vec{a}_{i-1}+\vec{b}_i)\\
+&\vdots\\
+\vec{a}_m &= f_m(W_m\vec{a}_{m-1}+\vec{b}_m)\\
+\end{align*}
+
+\subsection{Loss and Activation Functions}
+
+Loss and Activation functions are an essential part of the Neural Network Architecture. The Loss function is the metric by which Neural Networks are evaluated and trained. On the other had, activation functions allow for the Neural Network's flexibility by giving it non-linearity.
+
+The activation function, in the context of the definition above, is $f_i$. These functions, as I have said before, allow for the non-linearity of the Neural Network. A couple of typically used functions is the cosine, tangent, ReLU, Leaky ReLU, the logistic function, and many others. Each of these different functions has different properties, which makes each function perfect for a particular scenario. For example, in a Convolutional Neural Network, which typically is deep or has many layers, the ReLU or Leaky ReLU function is used as they help prevent the vanishing or exploding gradient problems.
+
+Loss functions turn the raw output of a neural network into something trainable by an optimization algorithm. These loss functions measure the error between the desired value and the value produced by a neural network. One might ask, why not use the accuracy to train? Unfortunately, since the accuracy function is not differentiable, it cannot be used as a loss function and train a neural network. Some typical functions are the mean square error or the l2-loss, the l1-loss, the hinge loss function, the cross-entropy loss, the negative log-likelihood, and many more.
+
+\section{Back-Propagation, SGD, and ADAM}
+
+Back-Propagation is a specific case of Automatic Differentiation (AD). AD is a Differentiation technique that takes advantage of the fact that computers evaluate expression sequentially. This fact allows for the repeated application of the chain rule. While being similar to both Symbolic Differentiation and Numerical Differentiation, it is neither. Both classical methods of differentiation are comparatively slow at calculating the gradient to complicated functions. 
+
+The chain rule, in calculus, is a formula to calculate the derivative of a composite function. If two functions, $f$ and $g$ are composite, that composite function is $h$, and $h$'s dependent variable is $x$ then the chain rule defined as 
+$$\frac{dh(x)}{dx}=\frac{d}{dx}(f(g(x)))=\frac{df}{dg}\bigg|_{g(x)}\cdot\frac{dg}{dx}\bigg|_{x}.$$ Forwards and Backwards accumulation of the computation graph is allowed using the chain rule. Many great tools exist to calculate this create and use these computation graphs via a GradientTape to calculate the gradient of arbitrary functions like PyTorch or Tensorflow python libraries. These library's GradientTape allows for the easy calculation of the gradient without laborious manual calculation of Back-propagation.
+
+\subsection{Stochastic Gradient Descent}
+
+The Stochastic Gradient Descent (SGD) is a stochastic approximation of the Gradient Descent algorithm that finds the minimum or optimizes a function. In the SGD algorithm, calculate the gradient resulting from a single randomly picked sample, then multiply it by a learning rate, hyper-parameter between 0 and 1, then add it to the weights to biases. $$\vec{w}=\vec{w}-\gamma\nabla \vec{f}(\vec{x})$$ Applying Back-propagation and SGD to Neural Networks if the mean square error is used as the loss-function. results in 
+\begin{align*}
+W_{m}(k+1)&=W_{m}(k)-\gamma \vec{s}_m (\vec{a}_{m-1})^T\\
+\vec{b}_m(k+1)&=\vec{b}_{m}(k)-\gamma \vec{s}_m
+\end{align*} where
+\begin{align*}
+s_{M}&=-2\dot{F}_M(\vec{n}_M)(\vec{t}-\vec{a})\\
+s_m&=\dot{F}_m(\vec{n}_m)(W_{m+1})^T s^{m+1}\\
+\dot{F}(\vec{n}_m)&=I\dot{f}(\vec{n}_m)^T,
+\end{align*} $I$ is the square identity matrix, and $m=M-1,\dots, 2, 1$ or for each layer, in reverse. As said before, the $s_M$ variable presented here is for the mean squared error loss function.
+
+\subsection{ADAM}
+
+What makes the Adam algorithm so popular is its robustness to changes in its hyper-parameters. It does this by keeping a single learning rate and an adaptive learning rate for different parameters calculated from a first and second gradient moments or moving averages of the gradient. Adam combines two algorithms. AdaGrad and RMSprop, combining their advantages over SGD. It has a couple of extra hyper-parameters, including $\beta_1$, $\beta_2$, and $\epsilon$. $\beta_1$ and $\beta_2$ are hyper-parameters that deal with the two moments, and $\epsilon$ improves numerical stability. IT is calculated by first calculating the current running average, \begin{align*}
+	k_m(t+1)&\leftarrow \beta_1 k_m(t)+(1-\beta_1)\nabla \vec{f}(\vec{x})\\
+	v_m(t+1)&\leftarrow \beta_2 v_m(t)+(1-\beta_2)(\nabla \vec{f}(\vec{x}))^2\\
+	\hat{k}_m&=\frac{k_m(t+1)}{1-\beta_1^{t+1}}\\
+	\hat{v}_m&=\frac{v_m(t+1)}{1-\beta_2^{t+1}},
+\end{align*} then update the weights, 
+$$w_m(t+1)\leftarrow w_m(t)-\gamma\frac{\hat{k}_m}{\sqrt{\hat{v_m}}+\epsilon}.$$
+
+\section{Reinforcement Learning}
+
+According to "Artificial Intelligence: A Modern Approach" by Russel and Norvig an agent as "anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators." For instance, an autonomous car will have the roads, and the area around the roads as the environment perceives through the various IR, radar, and visual sensors around the car. The autonomous car will interact with the environment through its various actuators, the accelerator, the brake, and the steering. 
+
+In terms of the environment, I will describe the agent as a satellite that is orbiting a pseudo-earth with a heavier atmosphere, to simulate an accelerated orbital decay. The orbital decay is accelerated because the orbital decay forces are relatively minute, so creating an agent in a reasonable amount of time with a reasonable amount of computational resources is done. Of course, this is a hyper-parameter that can be changed in the future to continue research into creating a more long-term agent.  
+
+The satellite's actuators are its engines that generate thrust and its angle of thrust. The goal of the agent would then be to try its best to maintain its orbit. The performance measure would be a function of the amount of time it stays within a certain threshold from its orbit altitude. A more detailed and mathematical description is explained in a later section.
+
+\begin{table}
+\caption{A simple description of the environment.}
+\begin{tabularx}{\columnwidth}{|X||X|X|X|X|} \hline
+Agent Type & Performance Measure & Environment & Actuators & Sensors \\ \hline
+Satellite  & How long the satellite is able to maintain it's orbit with the amount of fuel it has. & 
+Low Earth Orbit & The engine and it's angle of thrust. & Relative position, velocity data with respect to earth and it's target orbit, as well as it's current angle and thrust. \\ \hline
+\end{tabularx}
+\end{table}
+
+The environment is static, single-agent, fully observable sequential, and continuous. Static in that the agent does not have to keep cognizant while it is deliberating. Single-agent, while the environment is expanded to accommodate multiple agents to accelerate training to keep it simple, it is a single-agent environment. It is sequential where the agent's experience cannot be divided into atomic episodes, and every time step requires the last. Finally, it is continuous as the position, velocity, and other attributes are continuous. The actions of thrust and angle will be continuous. 
+
+Markov chains are stochastic models that describe possible events in a system where the probability of an event only depends on the current state. Markov reward process, an extension of Markov chains, add a reward to each state, and all past states' rewards are accumulated. There would be an immediate reward $R$ and an accumulated reward $G$ for every step in these Markov processes. An episode is then the set of states from the initial state to the terminal state, and here the episodic reward is $G$.
+
+Most Reinforcement Learning environments or tasks are Markov Decision Processes (MDPs). The basic premise behind MDPs is an initial state where, after taking a step, the system stochastically arrives at another state. These are stochastic processes where an action or a state change has uncertainty. An MDP example is a robotic plane with two states, stable and unstable, and two actions to increase or decrease the throttle. If the plane goes too fast, there is a change it could go into the unstable state, but if it goes too slow, there is also a chance it could go into the unstable state. As with Markov chains, Markov reward processes extend MDPs to include the rewards.
+A 5-tuple can mathematically define the extended MDPs, $$(S, A, P_a, R_a, \gamma).$$ Here $S$ are the state, $A$ the actions, $P_a(s',s)$ is the probability that action $a$ will result with action $s'$, and $R_a(s,s')$ is the immediate reward from the transition, resulting from action $a$, between states $s$ and $s'$. Finally, $\gamma$ is the reward discount factor. The accumulated reward at time $t$, $G_t$, is calculated by $$G_t\equiv \sum_{k=1}^\infty \gamma^k R_{t+k+1}.$$ As shown in the above equation, the gamma parameter is a direct measure of foresight. Its value can be between $0$ and $1$, but its typical value is between $0.99$ and $0.999$.
+
+Next, we need to look for a solution, the set of actions to take, which maximizes the reward. This solution is called a policy, which is typically denoted by $\pi$. $\pi(a|s)$ would then be a probability distribution of actions by the said policy concerning state $s$. 
+
+An essential part of RL and RL algorithms is the value of state, or, as is said in some literature, the state-action pair. Since the accumulated reward for a single Markov reward process is not very useful, as it can vary significantly between chains, the value is the average of many of these chains. Therefore, it is the expected accumulated reward starting form the state then act according to a policy $\pi$. $$V(s)=\mathbb{E}[G|S_t=s]$$ 
+
+\subsection{Taxonomy}
+
+There are two main categories of RL algorithms, Model-Free, and Model-Based algorithms. The main distinguishing factor between these two categories is whether the agent has access to a model of the environment. A model of the environment could be a function that predicts the state transitions and rewards.
+
+The model, within the Model-Based algorithm, is beneficial to the agent as it allows it to plan, thinking ahead, and evaluate the different action it could take—the result is a policy with experience from the different possible paths. An example is AlphaGo Zero, which utilizes the breathtaking Monte Carlo tree search (MCTS) algorithm. However, soldomly do we have access to the model function that the agent could use. In turn, if it wants to plane and formulate plans without access to the model, it would have to learn the model. One such algorithm is called MuZero, which can learn the rules of the games it plays, match the performance of AlphaZero, and achieve "state-of-the-art" performance in many Atari games. Leading to the two sub-categories under Model-Based Algorithms, Learned, and build-in model algorithms.
+
+Under Model-Free algorithms, there are two sub-categories, Policy Optimization and Q-Learning based algorithms. The main differentiating factor between the two sub-categories is what the RL algorithm learns. In Policy Optimization-based algorithms, the algorithm directly learn a state to action mapping. The Q-learning based algorithms learns what is called a Q-function that satisfies the Bellman Equation. In other words, a Q-learning based algorithm will learn action from a set of actions by finding the maximum. Some algorithms that fall into Q-learning based algorithms include DQN, Dueling DQN TD3, DDPG, and Rainbow. Some algorithms that belong to the Policy Optimization category is A2C/A3C, TRPO, ACKTR, and PPO. 
+
+\subsection{Cross-Entropy Method}
+
+\subsection{Q-Learning}
+
+\subsection{DQN}
+
+\subsection{TRPO}
+
+\subsection{PPO}

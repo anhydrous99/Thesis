@@ -26,6 +26,20 @@
 \usepackage{showkeys} % shows labels during draft mode
 %\usepackage[document]{ragged2e} % uncomment for non-justified text
 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage[ruled,vlined]{algorithm2e}
+\graphicspath{ {../Plots/} }
+
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage{tabularx}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
 
 % Uncomment the line below to check if text is aligned to margins
 %\margins
@@ -131,6 +145,8 @@ A brief biographical sketch of the student is required as part of each thesis.
 % It's a good idea to split your thesis up into different files and use
 % the \input command
 \input{introduction.tex}
+\input{physics.tex}
+\input{reinforcement_learning.tex}
 
 
 % This makes the bibliography.
