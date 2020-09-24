@@ -166,13 +166,15 @@ Under Model-Free algorithms, there are two sub-categories, Policy Optimization a
 
 The cross-entropy (CE) method is the second most straightforward algorithm to implement before the random algorithm. As the name implies, the random algorithm is just a random sampling of the available actions, and the CE method is only slightly more complicated to implement.
 
-An intuitive explanation of the CE method is to create a distribution of episodes using their cumulative reward then train a neural network on the top $n$\% of the episodes. Over time, the neural network will learn the attributes of these best episodes. There are two variations to the CE method. The episode generation is entirely from random sampling, or the episode generation is form the latest policy. 
+An intuitive explanation of the CE method is to create a distribution of episodes using their cumulative reward then train a neural network on the top $n$\% of the episodes. Over time, the neural network will learn the attributes of these best episodes. There are two variations to the CE method. The episode generation is entirely from random sampling, or the episode generation is form the latest policy. This algorithm is simple to implement but fails to learn from complicated environments. 
 
-\begin{algorithm}
-	\SetAlgoLined
-	\DontPrintSemicolon
-	\caption{Cross-Entropy Method}\label{alg:CE}
-\end{algorithm}
+\begin{enumerate}[label=Step \arabic*:, itemsep=0mm]
+	\item Generate a model with random weights.
+	\item Run the environment for an $N$ number of episodes with current model, recording their cumulative reward, actions, and states.
+	\item Only keep the top $n$\% of episodes with regard to their cumulative reward.
+	\item Train the model on the remaining episodes.
+	\item Go back to step 1, or exit when acceptable results have been achieved.
+\end{enumerate}
 
 \subsection{Q-Learning}
 
