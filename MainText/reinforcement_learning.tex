@@ -162,6 +162,8 @@ The model, within the Model-Based algorithm, is beneficial to the agent as it al
 
 Under Model-Free algorithms, there are two sub-categories, Policy Optimization and Q-Learning based algorithms. The main differentiating factor between the two sub-categories is what the RL algorithm learns. In Policy Optimization-based algorithms, the algorithm directly learn a state to action mapping. The Q-learning based algorithms learns what is called a Q-function that satisfies the Bellman Equation. In other words, a Q-learning based algorithm will learn action from a set of actions by finding the maximum. Some algorithms that fall into Q-learning based algorithms include DQN, Dueling DQN TD3, DDPG, and Rainbow. Some algorithms that belong to the Policy Optimization category is A2C/A3C, TRPO, ACKTR, and PPO. 
 
+Q-Learning based algorithms tend to be off-policy. Meaning, during training, these algorithms can use data from any point in the training processes. Off-policy algorithms train a different policy from generating the data, while On-policy algorithms train on the same policy generating the data.
+
 \subsection{Cross-Entropy Method}
 
 The cross-entropy (CE) method is the second most straightforward algorithm to implement before the random algorithm. As the name implies, the random algorithm is just a random sampling of the available actions, and the CE method is only slightly more complicated to implement.
@@ -178,7 +180,7 @@ An intuitive explanation of the CE method is to create a distribution of episode
 
 \subsection{Q-Learning}
 
-Q-Learning and DQN are centered around the Bellman Equation of Optimality, 
+Q-Learning is a Model-free off-policy algorithm that uses tabulation.
 
 \subsection{DQN}
 
