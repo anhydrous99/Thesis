@@ -164,8 +164,6 @@ Under Model-Free algorithms, there are two sub-categories, Policy Optimization a
 
 Q-Learning based algorithms tend to be off-policy. Meaning, during training, these algorithms can use data from any point in the training processes. Off-policy algorithms train a different policy from generating the data, while On-policy algorithms train on the same policy generating the data.
 
-\subsection{Bellman Equations}
-
 \subsection{Cross-Entropy Method}
 
 The cross-entropy (CE) method is the second most straightforward algorithm to implement before the random algorithm. As the name implies, the random algorithm is just a random sampling of the available actions, and the CE method is only slightly more complicated to implement.
@@ -182,9 +180,11 @@ An intuitive explanation of the CE method is to create a distribution of episode
 
 \subsection{Q-Learning}
 
-Q-Learning is a Model-free off-policy algorithm that uses tabulation.
+Q-Learning is a Model-free off-policy algorithm that uses tabulation. The Q in Q-Learning stands for quality, the quality of a particular action for a given state. $$Q:S\times A\rightarrow \mathbb{R}$$ A considerable part of off-policy algorithms and RL algorithms, in general, is the Bellman Equations. A table containing Q-Values is initiated, randomly or by some other means, and iterated according to the Bellman Equation for optimality. Where $A$ is the set of possible actions, $$Q_{t+1}(s_t, a_t)=Q_t(s_t, a_t)+\alpha \big(r_t+\gamma\max_{b\in A} Q_t(s_{t+1},b)-Q_t(s_t,a_t)\big).$$ The next action is chosen by $\max_{b\in A} Q_t(s_{t+1},b)$. Q-Learning tends to be combined with the epsilon-greedy algorithm to counteract and underfit and improve exploration. With the epsilon-greedy algorithm the chosen action becomes $$a_{\text{next}}=\begin{cases}\max_{b\in A} Q_t(s_{t+1},b) & \text{with probability }1-\epsilon \\ \text{random action}  & \text{with probability }\epsilon\end{cases}.$$
 
-\subsection{DQN}
+\subsection{Deep Q-Network (DQN)}
+
+DQN replaces the table with a neural network that learns the $Q$ mapping.
 
 \subsection{Policy Gradient}
 
