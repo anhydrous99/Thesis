@@ -184,10 +184,36 @@ Q-Learning is a Model-free off-policy algorithm that uses tabulation. The Q in Q
 
 \subsection{Deep Q-Network (DQN)}
 
-At a point, the number of state-action pairs, Q-values in the table becomes too large and too computationally expensive. A solution presented on a 2013 paper by DeepMind replaced this computationally expensive table with a Neural Network that maps the state and action to Q. Unfortunately, just doing this replacement doesn't result in a stable algorithm for all environments. For instance, an environment with sparse rewards could result, when training, in non-convergence due to the imperfect initial Q representation. The $\epsilon$-greedy method helps in this respect, but there are many different optimizations, including Dueling and Double DQN, Prioritized Experience Replay, Noisy Nets, and others.
+At a point, the number of state-action pairs, Q-values in the table becomes too large and too computationally expensive. A solution presented on a 2013 paper by DeepMind replaced this computationally expensive table with a Neural Network that maps the state and action to Q. Unfortunately, just doing this replacement doesn't result in a stable algorithm for all environments. For instance, an environment with sparse rewards could result, when training, in non-convergence due to the imperfect initial Q representation. The $\epsilon$-greedy method helps in this respect, but there are many different optimizations, including Dueling and Double DQN, Prioritized Experience Replay, Noisy Nets, target networks, and others. This algorithm and it's variants works exceptionally well in Atari game environments, that have a large state space and small action space, where it uses a Conolutional Neural Network and the loss function optimized using SGD or ADAM, $$L(s_t, a_t, r_t, s_{t+1})=\big(r_t+\gamma\max_{b\in A} Q_t(s_{t+1},b)-Q_t(s_t,a_t)\big)^2,$$ which is similar to the mean squared loss where $r_t+\gamma\max_{b\in A} Q_t(s_{t+1},b)$ is the target and $Q_t(s_t,a_t)$ is the prediction. Instead of using a table, this algorithm uses an experience replay buffer where past states, actions, rewards, and resulting states are stored and sampled to train the Neural Network.
 
-\subsection{Policy Gradient}
+Another massive problem with DQN is the fact that $Q(s_t, a_t)$ and $Q(s_{t+1}, a_{t+1})$ are only one step apart and, therefore, too similar. This similarity makes it too tricky for SGD or ADAM to train the Neural Network the mapping successfully. Here is where target networks come in. By separating the target and prediction Neural Network and allowing them to diverge, SGD and ADAM can train the target network; then, both network's parameters are periodically synchronized.
 
-\subsection{TRPO}
+\begin{algorithm}
+	\SetAlgoLined
+	\DontPrintSemicolon
+	Initialize experience replay queue $D$ with size $N$ \\
+	Initialize Neural Network for $Q$ function with random weights \\
+	Duplicate Neural Network $Q$ to $\hat{Q}$ \\
+	episode $\leftarrow 1$\\
+	\While{Reward has not converged}{
+	Initialize environment $s\leftarrow e$ \\
+	\For{$t=1,T$}{
+		$a\leftarrow \begin{cases}\max_{b\in A} Q(s,b) & \text{with probability }1-\epsilon \\ \text{random action}  & \text{with probability }\epsilon\end{cases}$ \\
+		$s_n, r\leftarrow e(a)$ Where $s$ is the state and $r$ is the reward\\
+		$D.$append$(s, a, r, s_n)$\\
+		$s\leftarrow s_n$\\
+		Sample minibatch $(s, a, r, s_n)$ from $D$\\
+		$y\leftarrow \begin{cases}r & t=T \\ r + \gamma max_{b\in A} \hat{Q}(s,b)& \text{otherwise}\end{cases}$\\
+		Perform SGD or ADAM on $\big(y-Q(s_t,a_t)\big)^2$ with respect to $Q$'s parameters\\
+		Every $N$ steps $\hat{Q}=Q$
+	}}
+	\caption{DQN with $\epsilon$-greedy and target network}\label{alg:dqn}
+\end{algorithm}
 
-\subsection{PPO}
+\subsection{REINFORCE}
+
+An alternative to Q-Learning methods is Policy Optimization methods. One of the simplest is REINFORCE. 
+
+\subsection{Trust Region Policy Optimization (TRPO)}
+
+\subsection{Proximal Policy Optimization (PPO)}
