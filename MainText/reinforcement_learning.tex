@@ -148,7 +148,10 @@ The environment is static, single-agent, fully observable sequential, and contin
 Markov chains are stochastic models that describe possible events in a system where the probability of an event only depends on the current state. Markov reward process, an extension of Markov chains, add a reward to each state, and all past states' rewards are accumulated. There would be an immediate reward $R$ and an accumulated reward $G$ for every step in these Markov processes. An episode is then the set of states from the initial state to the terminal state, and here the episodic reward is $G$.
 
 Most Reinforcement Learning environments or tasks are Markov Decision Processes (MDPs). The basic premise behind MDPs is an initial state where, after taking a step, the system stochastically arrives at another state. These are stochastic processes where an action or a state change has uncertainty. An MDP example is a robotic plane with two states, stable and unstable, and two actions to increase or decrease the throttle. If the plane goes too fast, there is a change it could go into the unstable state, but if it goes too slow, there is also a chance it could go into the unstable state. As with Markov chains, Markov reward processes extend MDPs to include the rewards.
-A 5-tuple can mathematically define the extended MDPs, $$(S, A, P_a, R_a, \gamma).$$ Here $S$ are the state, $A$ the actions, $P_a(s',s)$ is the probability that action $a$ will result with action $s'$, and $R_a(s,s')$ is the immediate reward from the transition, resulting from action $a$, between states $s$ and $s'$. Finally, $\gamma$ is the reward discount factor. The accumulated reward at time $t$, $G_t$, is calculated by $$G_t\equiv \sum_{k=1}^\infty \gamma^k R_{t+k+1}.$$ As shown in the above equation, the gamma parameter is a direct measure of foresight. Its value can be between $0$ and $1$, but its typical value is between $0.99$ and $0.999$.
+A 5-tuple can mathematically define the extended MDPs, $$(S, A, P_a, R_a, \gamma).$$ Here $S$ are the state, $A$ the actions, $P_a(s',s)$ is the probability that action $a$ will result with action $s'$, and $R_a(s,s')$ is the immediate reward from the transition, resulting from action $a$, between states $s$ and $s'$. Finally, $\gamma$ is the reward discount factor. The accumulated reward at time $t$, $G_t$, is calculated by 
+\begin{equation} \label{eq:discountedreward}
+	G_t\equiv \sum_{k=1}^\infty \gamma^k R_{t+k+1}.
+\end{equation} As shown in the above equation, the gamma parameter is a direct measure of foresight. Its value can be between $0$ and $1$, but its typical value is between $0.99$ and $0.999$. 
 
 Next, we need to look for a solution, the set of actions to take, which maximizes the reward. This solution is called a policy, which is typically denoted by $\pi$. $\pi(a|s)$ would then be a probability distribution of actions by the said policy concerning state $s$. 
 
@@ -184,7 +187,7 @@ Q-Learning is a Model-free off-policy algorithm that uses tabulation. The Q in Q
 
 \subsection{Deep Q-Network (DQN)}
 
-At a point, the number of state-action pairs, Q-values in the table becomes too large and too computationally expensive. A solution presented on a 2013 paper by DeepMind replaced this computationally expensive table with a Neural Network that maps the state and action to Q. Unfortunately, just doing this replacement doesn't result in a stable algorithm for all environments. For instance, an environment with sparse rewards could result, when training, in non-convergence due to the imperfect initial Q representation. The $\epsilon$-greedy method helps in this respect, but there are many different optimizations, including Dueling and Double DQN, Prioritized Experience Replay, Noisy Nets, target networks, and others. This algorithm and it's variants works exceptionally well in Atari game environments, that have a large state space and small action space, where it uses a Conolutional Neural Network and the loss function optimized using SGD or ADAM, $$L(s_t, a_t, r_t, s_{t+1})=\big(r_t+\gamma\max_{b\in A} Q_t(s_{t+1},b)-Q_t(s_t,a_t)\big)^2,$$ which is similar to the mean squared loss where $r_t+\gamma\max_{b\in A} Q_t(s_{t+1},b)$ is the target and $Q_t(s_t,a_t)$ is the prediction. Instead of using a table, this algorithm uses an experience replay buffer where past states, actions, rewards, and resulting states are stored and sampled to train the Neural Network.
+At a point, the number of state-action pairs, Q-values in the table becomes too large and too computationally expensive. A solution presented on a 2013 paper by DeepMind replaced this computationally expensive table with a Neural Network that maps the state and action to Q. Unfortunately, just doing this replacement doesn't result in a stable algorithm for all environments. For instance, an environment with sparse rewards could result, when training, in non-convergence due to the imperfect initial Q representation. The $\epsilon$-greedy method helps in this respect, but there are many different optimizations, including Dueling and Double DQN, Prioritized Experience Replay, Noisy Nets, target networks, and others. This algorithm and it's variants works exceptionally well in Atari game environments, that have a large state space and small action space, where it uses a Conolutional Neural Network and the loss function optimized using SGD or ADAM, $$L(s_t, a_t, r_t, s_{t+1})=\big(r_t+\alpha\max_{b\in A} Q_t(s_{t+1},b)-Q_t(s_t,a_t)\big)^2,$$ which is similar to the mean squared loss where $r_t+\alpha\max_{b\in A} Q_t(s_{t+1},b)$ is the target and $Q_t(s_t,a_t)$ is the prediction. Instead of using a table, this algorithm uses an experience replay buffer where past states, actions, rewards, and resulting states are stored and sampled to train the Neural Network.
 
 Another massive problem with DQN is the fact that $Q(s_t, a_t)$ and $Q(s_{t+1}, a_{t+1})$ are only one step apart and, therefore, too similar. This similarity makes it too tricky for SGD or ADAM to train the Neural Network the mapping successfully. Here is where target networks come in. By separating the target and prediction Neural Network and allowing them to diverge, SGD and ADAM can train the target network; then, both network's parameters are periodically synchronized.
 
@@ -203,7 +206,7 @@ Another massive problem with DQN is the fact that $Q(s_t, a_t)$ and $Q(s_{t+1}, 
 		$D.$append$(s, a, r, s_n)$\\
 		$s\leftarrow s_n$\\
 		Sample minibatch $(s, a, r, s_n)$ from $D$\\
-		$y\leftarrow \begin{cases}r & t=T \\ r + \gamma max_{b\in A} \hat{Q}(s,b)& \text{otherwise}\end{cases}$\\
+		$y\leftarrow \begin{cases}r & t=T \\ r + \alpha max_{b\in A} \hat{Q}(s,b)& \text{otherwise}\end{cases}$\\
 		Perform SGD or ADAM on $\big(y-Q(s_t,a_t)\big)^2$ with respect to $Q$'s parameters\\
 		Every $N$ steps $\hat{Q}=Q$
 	}}
@@ -214,23 +217,26 @@ Another massive problem with DQN is the fact that $Q(s_t, a_t)$ and $Q(s_{t+1}, 
 
 An alternative to Q-Learning methods is Policy Optimization methods. These method's goal is to optimize the probabilities of actions in order to have higher returns. Since these methods rely directly on optimizing the policy instead of recording the state-action pair, it is more efficient when learning environments with continuous actions and continuous states.
 
-A  performance measure is required here and a symbol that stands for a policy's parameters, $\theta$. This performance measure is defined as $J$ and is a function of the policy parameter, $J(\theta)$. Similarly, the policy's notation evolves to a function also with regards to its policy parameters. These Policy Optimization algorithms aim to optimize the performance; if SGD is used to optimize $J(\theta)$, $$\theta_{t+1}=\theta_t+\gamma \nabla J(\theta_t).$$ $J$ is defined as $$J(\theta)\equiv v_{\pi_{\theta}}(s_0).$$ $v_{\pi_{\theta}}$ is the value of a state with regard to the policy, $\pi_{\theta}$. Notice $J$ depends also on the state, this changes to the policy's parameters difficult. The policy gradient theorem fixes by separating the policy; it is defined as $$\nabla J(\theta)\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta).$$ Where $\mu(s)$ is the on-policy distribution under $\pi$, 
+A  performance measure is required here and a symbol that stands for a policy's parameters, $\theta$. This performance measure is defined as $J$ and is a function of the policy parameter, $J(\theta)$. Similarly, the policy's notation evolves to a function also with regards to its policy parameters. These Policy Optimization algorithms aim to optimize the performance; if SGD is used to optimize $J(\theta)$, $$\theta_{t+1}=\theta_t+\alpha \nabla J(\theta_t).$$ $J$ is defined as $$J(\theta)\equiv v_{\pi_{\theta}}(s_0).$$ $v_{\pi_{\theta}}$ is the value of a state with regard to the policy, $\pi_{\theta}$. Notice $J$ depends also on the state, this changes to the policy's parameters difficult. The policy gradient theorem fixes by separating the policy; it is defined as $$\nabla J(\theta)\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta).$$ Where $\mu(s)$ is the on-policy distribution under $\pi$, 
 
 In the Vanilla Policy Gradient (VPG) method, Vanilla, because it has no modifications, the algorithm samples actions according to the latest policy and over time, while at the start of training is almost entirely random, over time becomes less random. A con to this method is, it does tend to get stuck in a local optimum.
 
 One of the simplest is REINFORCE; it is a Monte-Carlo version of the Policy Gradient Algorithm. There is, however, more than one version of this algorithm, each implements an improvement over the vanilla REINFORCE algorithm, but they all, by Monte-Carlo methods, rely on an estimated return to update the policy's parameters. Using the policy gradient theorem as a basis
 \begin{align*}
 	\nabla J(\theta)&\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta) \\
-	&=\mathbb{E}_\pi \bigg[\sum_a q_\pi(s_s, a)\nabla_\theta \pi(a|s_t, \theta)\bigg]
-\end{align*}
+	&=\mathbb{E}_\pi \bigg[\sum_a q_\pi(s_s, a)\nabla_\theta \pi(a|s_t, \theta)\bigg].
+\end{align*} After manipulation, this equation yields to the estimate of $\nabla J(\theta)$ ,$$\nabla J(\theta)=\mathbb{E}\bigg[G_t \frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}\bigg]\bigg|a_t\in \text{possible actions},$$ which, when plugging into the parameter update, we get the following equation, $$\theta_{t+1}=\theta_t+\alpha G_t\frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}=\theta_t + \alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta).$$
 
 \begin{algorithm}
 	\SetAlgoLined
 	\DontPrintSemicolon
-	\KwIn{A policy $\pi(a|s)$}
-	Initialize randomly the policy parameters \\
+	\KwIn{A policy $\pi(a|s, \theta)$ with initialized parameters $\theta$}
 	\While{Reward has not converged}{
-		Run environment for a single episode with $\{(s_0, )\}$
+		Run environment for a single episode with $D=\{(s_0, a_0, r_1), \dots, (s_{T-1}, a_{T-1}, r_T)\}$\\
+		Calculate $G_t$ for every step in the episode via equation~\ref{eq:discountedreward}\\
+		\For{$d\in D$}{
+			$\theta\leftarrow+\alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta)$
+		}
 	}
 	\caption{REINFORCE Algorithm}
 \end{algorithm}
