@@ -212,7 +212,28 @@ Another massive problem with DQN is the fact that $Q(s_t, a_t)$ and $Q(s_{t+1}, 
 
 \subsection{REINFORCE}
 
-An alternative to Q-Learning methods is Policy Optimization methods. One of the simplest is REINFORCE. 
+An alternative to Q-Learning methods is Policy Optimization methods. These method's goal is to optimize the probabilities of actions in order to have higher returns. Since these methods rely directly on optimizing the policy instead of recording the state-action pair, it is more efficient when learning environments with continuous actions and continuous states.
+
+A  performance measure is required here and a symbol that stands for a policy's parameters, $\theta$. This performance measure is defined as $J$ and is a function of the policy parameter, $J(\theta)$. Similarly, the policy's notation evolves to a function also with regards to its policy parameters. These Policy Optimization algorithms aim to optimize the performance; if SGD is used to optimize $J(\theta)$, $$\theta_{t+1}=\theta_t+\gamma \nabla J(\theta_t).$$ $J$ is defined as $$J(\theta)\equiv v_{\pi_{\theta}}(s_0).$$ $v_{\pi_{\theta}}$ is the value of a state with regard to the policy, $\pi_{\theta}$. Notice $J$ depends also on the state, this changes to the policy's parameters difficult. The policy gradient theorem fixes by separating the policy; it is defined as $$\nabla J(\theta)\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta).$$ Where $\mu(s)$ is the on-policy distribution under $\pi$, 
+
+In the Vanilla Policy Gradient (VPG) method, Vanilla, because it has no modifications, the algorithm samples actions according to the latest policy and over time, while at the start of training is almost entirely random, over time becomes less random. A con to this method is, it does tend to get stuck in a local optimum.
+
+One of the simplest is REINFORCE; it is a Monte-Carlo version of the Policy Gradient Algorithm. There is, however, more than one version of this algorithm, each implements an improvement over the vanilla REINFORCE algorithm, but they all, by Monte-Carlo methods, rely on an estimated return to update the policy's parameters. Using the policy gradient theorem as a basis
+\begin{align*}
+	\nabla J(\theta)&\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta) \\
+	&=\mathbb{E}_\pi \bigg[\sum_a q_\pi(s_s, a)\nabla_\theta \pi(a|s_t, \theta)\bigg]
+\end{align*}
+
+\begin{algorithm}
+	\SetAlgoLined
+	\DontPrintSemicolon
+	\KwIn{A policy $\pi(a|s)$}
+	Initialize randomly the policy parameters \\
+	\While{Reward has not converged}{
+		Run environment for a single episode with $\{(s_0, )\}$
+	}
+	\caption{REINFORCE Algorithm}
+\end{algorithm}
 
 \subsection{Trust Region Policy Optimization (TRPO)}
 
