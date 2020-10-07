@@ -183,7 +183,11 @@ An intuitive explanation of the CE method is to create a distribution of episode
 
 \subsection{Q-Learning}
 
-Q-Learning is a Model-free off-policy algorithm that uses tabulation. The Q in Q-Learning stands for quality, the quality of a particular action for a given state. $$Q:S\times A\rightarrow \mathbb{R}$$ A considerable part of off-policy algorithms and RL algorithms, in general, is the Bellman Equations. A table containing Q-Values is initiated, randomly or by some other means, and iterated according to the Bellman Equation for optimality. Where $A$ is the set of possible actions, $$Q_{t+1}(s_t, a_t)=Q_t(s_t, a_t)+\alpha \big(r_t+\gamma\max_{b\in A} Q_t(s_{t+1},b)-Q_t(s_t,a_t)\big).$$ The next action is chosen by $\max_{b\in A} Q_t(s_{t+1},b)$. Q-Learning tends to be combined with the $\epsilon$-greedy method to counteract and underfit and improve exploration. With the $\epsilon$-greedy method the chosen action becomes $$a_{\text{next}}=\begin{cases}\max_{b\in A} Q_t(s_{t+1},b) & \text{with probability }1-\epsilon \\ \text{random action}  & \text{with probability }\epsilon\end{cases}.$$
+Q-Learning is a Model-free off-policy algorithm that uses tabulation. The Q in Q-Learning stands for quality, the quality of a particular action for a given state. $$Q:S\times A\rightarrow \mathbb{R}$$ A considerable part of off-policy algorithms and RL algorithms, in general, is the Bellman Equations. A table containing Q-Values is initiated, randomly or by some other means, and iterated according to the Bellman Equation for optimality. Where $A$ is the set of possible actions, 
+\begin{equation}\label{eq:qupdate}
+	Q_{t+1}(s_t, a_t)=Q_t(s_t, a_t)+\alpha \big(r_t+\gamma\max_{b\in A} Q_t(s_{t+1},b)-Q_t(s_t,a_t)\big).
+\end{equation}
+ The next action is chosen by $\max_{b\in A} Q_t(s_{t+1},b)$. Q-Learning tends to be combined with the $\epsilon$-greedy method to counteract and underfit and improve exploration. With the $\epsilon$-greedy method the chosen action becomes $$a_{\text{next}}=\begin{cases}\max_{b\in A} Q_t(s_{t+1},b) & \text{with probability }1-\epsilon \\ \text{random action}  & \text{with probability }\epsilon\end{cases}.$$
 
 \subsection{Deep Q-Network (DQN)}
 
@@ -212,6 +216,20 @@ Another massive problem with DQN is the fact that $Q(s_t, a_t)$ and $Q(s_{t+1}, 
 	}}
 	\caption{DQN with $\epsilon$-greedy and target network}\label{alg:dqn}
 \end{algorithm}
+
+\subsection{Rainbow}
+
+DeepMind developed in 2017 the Rainbow algorithm, which incorporates six improvements to the DQN version publish in their 2015 paper, which itself incorporates some improvements like target networks to the vanilla paper in 2013. These improvements include:
+\begin{enumerate}[itemsep=0mm]
+	\item Double Q-Learning
+	\item Prioritized Experience Replay
+	\item Dueling Network
+	\item Multi-step learning
+	\item Distributional RL
+	\item Noisy Nets
+\end{enumerate}
+
+Double Q-Learning is an update to the Q update equation~\ref{eq:qupdate} that fixes a problem where the Q-values are overestimated for some actions; Hado van Hasselt et al. showed this overestimation in its presentation of Double Q-Learning where the author proved that this overestimation exists, more generally, due to any inaccuracy during learning.
 
 \subsection{REINFORCE}
 
