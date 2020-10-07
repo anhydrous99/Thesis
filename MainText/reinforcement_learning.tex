@@ -235,7 +235,11 @@ The Prioritized Experience Replay modification tackles another part of the DQN a
 The typical way of implementing this replay would be a Priority Queue with random access, but because large portions of the queue probabilities need to be updated, a Segment Tree is optimal. Summing a portion of the Queue requires $O(n)$ complexity while a Segment Tree's complexity is $O(\log n)$.
 
 
-Dueling Networks
+The third improvement is Dueling Networks. This improvement requires introducing the advantage, which is a value obtained by subtracting the Q-value by that state's value, 
+\begin{equation}\label{eq:advantage}
+	A(s,a)=Q(s,a)-V(s).
+\end{equation}
+ Ziyu Wang et al. proposes instead of estimating the Q-value directly, using a Neural Network to estimate the Advantage and the Value of the function and calculate the Q-value from that. Intuitively one would try to calculate the Q-value via equation~\ref{eq:advantage} by reformulating it to $Q=V+A$, but this would be a mistake. After summing the value and the advantage when training, the resulting Q-value is "unidentifiable." The value and the advantage are not recoverable from this Q-value, leading to bad performance. The solution is to zero the advantage for the chosen action, $$Q(s, a)=V(s)+A(s, a)-\frac{\sum_{b\in A} A(s, b)}{n_{\text{actions}}}.$$ Instead of having two CNNs or NNs to estimate the value and estimate the advantage, Rainbow uses a backbone CNN with a two-prong NN; one prong estimates the value, and the other estimates the advantage.
 
 \subsection{REINFORCE}
 
