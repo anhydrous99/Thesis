@@ -240,20 +240,26 @@ The third improvement is Dueling Networks. This improvement requires introducing
 	A(s,a)=Q(s,a)-V(s).
 \end{equation}
  Ziyu Wang et al. proposes instead of estimating the Q-value directly, using a Neural Network to estimate the Advantage and the Value of the function and calculate the Q-value from that. Intuitively one would try to calculate the Q-value via equation~\ref{eq:advantage} by reformulating it to $Q=V+A$, but this would be a mistake. After summing the value and the advantage when training, the resulting Q-value is "unidentifiable." The value and the advantage are not recoverable from this Q-value, leading to bad performance. The solution is to zero the advantage for the chosen action, $$Q(s, a)=V(s)+A(s, a)-\frac{\sum_{b\in A} A(s, b)}{n_{\text{actions}}}.$$ Instead of having two CNNs or NNs to estimate the value and estimate the advantage, Rainbow uses a backbone CNN with a two-prong NN; one prong estimates the value, and the other estimates the advantage.
+ 
+Multi-step learning has initially been an expansion of Q-Learning, where instead of calculating a single-step Q-value, the rewards for n-steps are used and accumulated for the n-step Q-value. Similarly, for Deep Q-Learning, this n-step is instead an approximation. The discounted reward function would then be $$r_t^{(n)}\equiv \sum_{k=0}^{n-1} \gamma_t^k r_{t+k+1}$$ and the resulting loss function is $$L(s_t, a_t, r_t, s_{t+1})=(r_t^{(n)}+\gamma^{(n)} Q_2(s_{t+1}, \max_{b\in A}Q_1(s_{t+1}, b)) - Q_1(s_t, a_t))^2.$$
+ 
+In Distributional Reinforcement Learning, the next improvement to Rainbow the returns' distribution is learned instead of the expected reward. The bellman equation is replace by the distributional bellman equation. Here instead of a single expected reward is created from the distributional model but a series of atom that represent a distribution. These atoms are defined by $$z_i=v_{\min} +(i-1)\frac{v_{\max}-v_{\min}}{N_{\text{atoms}}-1}.$$ Where $v_{\max}$ is the largest possible return of the distribution, $v_{\min}$ is the smallest possible return of the distribution, $N_{\text{atom}}$ are the number of atoms to use in the distribution. 
 
-\subsection{REINFORCE}
+The last improvement to the DQN function expands the exploration done by the network freeing it from the $\epsilon$-greedy method and embedding this exploration within the Q-approximating model itself. A DQN Neural Network model's basic anatomy consists of an initial series of Convolutional Layers with the typical RELU layers in between. This series is then followed by a flattening of the tensor and a Feed-Forward Neural Network. Following this series of Convolutional Layers and a tensor's flattening, the following Neural Network's layers are replaced with Noisy Layers, $$\vec{a}=(\vec{b}+W\vec{x})+(\vec{b}_{\text{noisy}}\odot \epsilon^b +(W_{\text{noisy}}\odot \epsilon^w)\vec{x}).$$ Where $\vec{b}_{\text{noisy}}$ and $W_{\text{noisy}}$ are a trainable vector and matrix whose initial values are random, as are $\vec{b}$ and $W$. $\epsilon^b$ and $\epsilon^W$ are a random vector and weight generated from a normal distribution. 
+
+\subsection{REINFORCE}\label{subsec:reinforce}
 
 An alternative to Q-Learning methods is Policy Optimization methods. These method's goal is to optimize the probabilities of actions in order to have higher returns. Since these methods rely directly on optimizing the policy instead of recording the state-action pair, it is more efficient when learning environments with continuous actions and continuous states.
 
 A  performance measure is required here and a symbol that stands for a policy's parameters, $\theta$. This performance measure is defined as $J$ and is a function of the policy parameter, $J(\theta)$. Similarly, the policy's notation evolves to a function also with regards to its policy parameters. These Policy Optimization algorithms aim to optimize the performance; if SGD is used to optimize $J(\theta)$, $$\theta_{t+1}=\theta_t+\alpha \nabla J(\theta_t).$$ $J$ is defined as $$J(\theta)\equiv v_{\pi_{\theta}}(s_0).$$ $v_{\pi_{\theta}}$ is the value of a state with regard to the policy, $\pi_{\theta}$. Notice $J$ depends also on the state, this changes to the policy's parameters difficult. The policy gradient theorem fixes by separating the policy; it is defined as $$\nabla J(\theta)\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta).$$ Where $\mu(s)$ is the on-policy distribution under $\pi$, 
 
-In the Vanilla Policy Gradient (VPG) method, Vanilla, because it has no modifications, the algorithm samples actions according to the latest policy and over time, while at the start of training is almost entirely random, over time becomes less random. A con to this method is, it does tend to get stuck in a local optimum.
+In the Vanilla Policy Gradient (VPG) or Policy Gradient (PG) method, Vanilla, because it has no modifications, the algorithm samples actions according to the latest policy and over time, while at the start of training is almost entirely random, over time becomes less random. A con to this method is, it does tend to get stuck in a local optimum.
 
 One of the simplest is REINFORCE; it is a Monte-Carlo version of the Policy Gradient Algorithm. There is, however, more than one version of this algorithm, each implements an improvement over the vanilla REINFORCE algorithm, but they all, by Monte-Carlo methods, rely on an estimated return to update the policy's parameters. Using the policy gradient theorem as a basis
 \begin{align*}
 	\nabla J(\theta)&\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta) \\
 	&=\mathbb{E}_\pi \bigg[\sum_a q_\pi(s_s, a)\nabla_\theta \pi(a|s_t, \theta)\bigg].
-\end{align*} After manipulation, this equation yields to the estimate of $\nabla J(\theta)$ ,$$\nabla J(\theta)=\mathbb{E}\bigg[G_t \frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}\bigg]\bigg|a_t\in \text{possible actions},$$ which, when plugging into the parameter update, we get the following equation, $$\theta_{t+1}=\theta_t+\alpha G_t\frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}=\theta_t + \alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta).$$
+\end{align*} After manipulation, this equation yields to the estimate of $\nabla J(\theta)$ ,$$\nabla J(\theta)=\mathbb{E}\bigg[G_t \frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}\bigg]\bigg|a_t\in \text{possible actions},$$ which, when plugging into the parameter update, we get the following equation, $$\theta_{t+1}=\theta_t+\alpha G_t\frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}=\theta_t + \alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta).$$ Notice how the identity $\frac{\nabla x}{x}=\nabla \ln x$ is used.
 
 \begin{algorithm}
 	\SetAlgoLined
@@ -270,5 +276,15 @@ One of the simplest is REINFORCE; it is a Monte-Carlo version of the Policy Grad
 \end{algorithm}
 
 \subsection{Trust Region Policy Optimization (TRPO)}
+
+TRPO is the precursor to the PPO algorithm but weirdly is more complicated. TRPO is an improvement over the PG method. It fixes a big problem in the PG method, where it becomes overconfident and learns the wrong behaviors. Notice from subsection~\ref{subsec:reinforce} how the REINFORCE method, and in turn, the PG method, are first-order methods and are therefore unable to take into account the second-order curvature while maximizing the reward. If REINFORCE makes a step in the rewards graph that results in worse performance, it then continues from this worse state. Another fault with REINFORCE happens because the entire trajectory for an episode is required before the policy is update, resulting in low sample efficiency. 
+
+TRPO improves PG by integrating the MM algorithm, otherwise called the Majorize-Minimization algorithm, which finds substitute, lower or higher bound functions and is an iterative algorithm. It then optimizes based on this function, which guarantees optimization. In the MM algorithm, a function $g(\theta|\theta_m)$ is the minorize of the function $f(\theta)$ when 
+\begin{align*}
+	g(\theta|\theta_m)&\leq f(\theta) &\text{for all }\theta\\
+	g(\theta_m|\theta_m)&=f(\theta_m).
+\end{align*} Then, to maximize the reward, a minorize function is found and maximized, which produces the next point, $\theta_{m+1}$, from which to maximize. Further, it goes that every further point's reward is either greater or equal to the previous point.
+
+The second improvement to the PG method is a change from the 
 
 \subsection{Proximal Policy Optimization (PPO)}
