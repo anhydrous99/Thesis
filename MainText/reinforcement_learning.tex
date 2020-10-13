@@ -269,11 +269,22 @@ One of the simplest is REINFORCE; it is a Monte-Carlo version of the Policy Grad
 		Run environment for a single episode with $D=\{(s_0, a_0, r_1), \dots, (s_{T-1}, a_{T-1}, r_T)\}$\\
 		Calculate $G_t$ for every step in the episode via equation~\ref{eq:discountedreward}\\
 		\For{$d\in D$}{
-			$\theta\leftarrow+\alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta)$
+			$\theta\leftarrow\theta+\alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta)$
 		}
 	}
 	\caption{REINFORCE Algorithm}
 \end{algorithm}
+
+An improvement to REINFORCE integrates a baseline function. This baseline function becomes very important, especially in the A2C algorithm. The problem that the baseline function mitigates is its high variance. An example of this variance can be seen with the trajectory that results in $\nabla_\theta \ln \pi(a|s, \theta)=[0.4, 0.6, 0.8]$ and $G=[255, 300, 350]$ then the variance of their component-wise product is calculated to 
+\begin{align*}
+	Var(\nabla_\theta \ln \pi(a|s, \theta)\times G)&=Var([0.4\times 255, 0.6\times 300, 0.8\times 350])\\
+	&=Var([102, 180, 280])\\
+	&=7961.3.
+\end{align*} The objective function with the baseline function is $$\nabla J(\theta)=\mathbb{E}[(G_t-b(s_t))\nabla_\theta \pi (a_t|s_t, \theta)].$$ If we then let $b(s_t)=450$ then the calculated variance will then be $41.34$.
+
+\subsection{DDPG}
+
+\subsection{A2C/A3C}
 
 \subsection{Trust Region Policy Optimization (TRPO)}
 
