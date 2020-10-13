@@ -285,9 +285,9 @@ TRPO improves PG by integrating the MM algorithm, otherwise called the Majorize-
 	g(\theta_m|\theta_m)&=f(\theta_m).
 \end{align*} Then, to maximize the reward, a minorize function is found and maximized, which produces the next point, $\theta_{m+1}$, from which to maximize. Further, it goes that every further point's reward is either greater or equal to the previous point. The second improvement to the PG method is a change from the line optimization, where Gradient Descent chooses a direction, and takes a fixed-sized step, whereas, in Trust Region, the algorithm first calculates the maximum sized step, after which it finds the optimal step within that region to take.
 
-It samples actions according to the latest policy, firstly in a random manner. As time goes on the algorithm learns, the actions sampled become less random. Of course, this can mean the algorithm is stuck in a local maxima. This progression, of course, also means the algorithm can get stuck in a local maximum.
+It samples actions according to the latest policy, firstly in a random manner. As time goes on the algorithm learns, the actions sampled become less random. Of course, this can mean the algorithm is stuck in a local maxima. This progression, of course, also means the algorithm can get stuck in a local maximum. In these Trust Region optimization algorithms, the quadratic Taylor expansion approximates the objective function.
 
-This algorithm's complexity steps from the required calculation of the approximation of the inverse Hessian matrix, a set of second-order partial derivatives, of an average Kullback-Leibler (KL) divergence; hence, this is a second-order algorithm. 
+This algorithm's complexity steps from the required calculation of the approximation of the inverse Hessian matrix, a set of second-order partial derivatives, of an average Kullback-Leibler (KL) divergence; hence, this is a second-order algorithm. Nonetheless, this algorithm gives monotonic improvement and is one of the first on-policy algorithms that train policies with many parameters. 
 
 \subsection{Proximal Policy Optimization (PPO)}
 
