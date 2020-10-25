@@ -64,7 +64,7 @@ The history of neural networks goes back to the 1940 but was really popularized 
 
 \subsection{Perceptrons}
 
-In the simplest of thinking a perceptron simply is a single-layer neural network. It basically is a piecewise function where a weights $w$ and bias $b$ determine the output. $$f(\vec{x})=\begin{cases}
+In the simplest of thinking a perceptron simply is a single-layer Neural Network and one of earliest forms of a Neural Network, \cite{rosenblatt_1958}. It basically is a piecewise function where a weights $w$ and bias $b$ determine the output. $$f(\vec{x})=\begin{cases}
 1 \mbox{ if } \vec{w}\cdot \vec{x}+b>0 \\
 0 \mbox{ otherwise }
 \end{cases}$$ Where $\vec{w}$  is the weight vector, $b$ is the bias, and $x$ is the input vector.  Perceptrons are a powerful concept since n-Dimensional clusters can be linearly separated. A great example where perceptrons are extremely helpful is with logical operators. A single perceptron can mimic most logical operators except for XOR; Multiple perceptrons can mimick XOR. Since the perceptron is a linear classifier, the perceptron will fail if a cluster is not linearly separable. 
@@ -87,6 +87,13 @@ A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an
 &\vdots\\
 \vec{a}_m &= f_m(W_m\vec{a}_{m-1}+\vec{b}_m)\\
 \end{align*}
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.75]{NNDiagram}
+	\caption{A diagram of a Feed Forward Neural Network with an input layer, hidden layers, and an output layer.}
+	\label{fig:NNDiagram}
+\end{figure}
 
 \subsection{Loss and Activation Functions}
 
@@ -114,7 +121,7 @@ W_{m}(k+1)&=W_{m}(k)-\gamma \vec{s}_m (\vec{a}_{m-1})^T\\
 s_{M}&=-2\dot{F}_M(\vec{n}_M)(\vec{t}-\vec{a})\\
 s_m&=\dot{F}_m(\vec{n}_m)(W_{m+1})^T s^{m+1}\\
 \dot{F}(\vec{n}_m)&=I\dot{f}(\vec{n}_m)^T,
-\end{align*} $I$ is the square identity matrix, and $m=M-1,\dots, 2, 1$ or for each layer, in reverse. As said before, the $s_M$ variable presented here is for the mean squared error loss function.
+\end{align*} $I$ is the square identity matrix, and $m=M-1,\dots, 2, 1$ or for each layer, in reverse. As said before, the $s_M$ variable presented here is for the mean squared error loss function \cite{hagan_demuth_beale_jesus_orlando_de_2014}.
 
 \subsection{ADAM}
 
@@ -124,7 +131,7 @@ What makes the Adam algorithm so popular is its robustness to changes in its hyp
 	\hat{k}_m&=\frac{k_m(t+1)}{1-\beta_1^{t+1}}\\
 	\hat{v}_m&=\frac{v_m(t+1)}{1-\beta_2^{t+1}},
 \end{align*} then update the weights, 
-$$w_m(t+1)\leftarrow w_m(t)-\gamma\frac{\hat{k}_m}{\sqrt{\hat{v_m}}+\epsilon}.$$
+$$w_m(t+1)\leftarrow w_m(t)-\gamma\frac{\hat{k}_m}{\sqrt{\hat{v_m}}+\epsilon} \cite{kingma_ba_2017}.$$
 
 \section{Reinforcement Learning}
 
@@ -157,6 +164,13 @@ Next, we need to look for a solution, the set of actions to take, which maximize
 
 An essential part of RL and RL algorithms is the value of state, or, as is said in some literature, the state-action pair. Since the accumulated reward for a single Markov reward process is not very useful, as it can vary significantly between chains, the value is the average of many of these chains. Therefore, it is the expected accumulated reward starting form the state then act according to a policy $\pi$. $$V(s)=\mathbb{E}[G|S_t=s]$$ 
 
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.75]{RLEnv}
+	\caption{A diagram of a typical Reinforcement Learning Environment.}
+	\label{fig:RLEnv}
+\end{figure}
+
 \subsection{Taxonomy}
 
 There are two main categories of RL algorithms, Model-Free, and Model-Based algorithms. The main distinguishing factor between these two categories is whether the agent has access to an environment model. A model of the environment could be a function that predicts the state transitions and rewards.
@@ -171,7 +185,7 @@ Q-Learning based algorithms tend to be off-policy. Meaning, during training, the
 
 The cross-entropy (CE) method is the second most straightforward algorithm to implement before the random algorithm. As the name implies, the random algorithm is just a random sampling of the available actions, and the CE method is only slightly more complicated to implement.
 
-An intuitive explanation of the CE method is to create a distribution of episodes using their cumulative reward then train a neural network on the top $n$\% of the episodes. Over time, the neural network will learn the attributes of these best episodes. There are two variations to the CE method. The episode generation is entirely from random sampling, or the episode generation is form the latest policy. This algorithm is simple to implement but fails to learn from complicated environments. 
+An intuitive explanation of the CE method is to create a distribution of episodes using their cumulative reward then train a neural network on the top $n$\% of the episodes. Over time, the neural network will learn the attributes of these best episodes. There are two variations to the CE method \cite{boer_kroese_mannor_rubinstein_2005}. The episode generation is entirely from random sampling, or the episode generation is form the latest policy. This algorithm is simple to implement but fails to learn from complicated environments. 
 
 \begin{enumerate}[label=Step \arabic*:, itemsep=0mm]
 	\item Generate a model with random weights.
@@ -316,15 +330,15 @@ Asynchronous Advantage Actor Critic (A3C) and A2C, a derivation of A3C that is s
 
 \subsection{Trust Region Policy Optimization (TRPO)}
 
-TRPO is the precursor to the PPO algorithm but weirdly is more complicated. TRPO is an improvement over the PG method. It fixes a big problem in the PG method, where it becomes overconfident and learns the wrong behaviors. Notice from subsection~\ref{subsec:reinforce} how the REINFORCE method, and in turn, the PG method, are first-order methods and are therefore unable to take into account the second-order curvature while maximizing the reward. If REINFORCE makes a step in the rewards graph that results in worse performance, it then continues from this worse state. Another fault with REINFORCE happens because the entire trajectory for an episode is required before the policy is update, resulting in low sample efficiency. 
+TRPO, \cite{schulman_levine_mortiz_jordan_abbeel_2015}, is the precursor to the PPO algorithm but weirdly is more complicated. TRPO is an improvement over the PG method. It fixes a big problem in the PG method, where it becomes overconfident and learns the wrong behaviors. Notice from subsection~\ref{subsec:reinforce} how the REINFORCE method, and in turn, the PG method, are first-order methods and are therefore unable to take into account the second-order curvature while maximizing the reward. If REINFORCE makes a step in the rewards graph that results in worse performance, it then continues from this worse state. Another fault with REINFORCE happens because the entire trajectory for an episode is required before the policy is update, resulting in low sample efficiency. 
 
-TRPO improves PG by integrating the MM algorithm, otherwise called the Majorize-Minimization algorithm, which finds substitute, lower or higher bound functions and is an iterative algorithm. It then optimizes based on this function, which guarantees optimization. In the MM algorithm, a function $g(\theta|\theta_m)$ is the minorize of the function $f(\theta)$ when 
+TRPO improves PG by integrating the MM algorithm, otherwise called the Majorize-Minimization algorithm, which finds substitute, lower or higher bound functions and is an iterative algorithm. It then optimizes based on this function, which guarantees optimization \cite{lange_2007}. In the MM algorithm, a function $g(\theta|\theta_m)$ is the minorize of the function $f(\theta)$ when 
 \begin{align*}
 	g(\theta|\theta_m)&\leq f(\theta) &\text{for all }\theta\\
-	g(\theta_m|\theta_m)&=f(\theta_m).
+	g(\theta_m|\theta_m)&=f(\theta_m). 
 \end{align*} Then, to maximize the reward, a minorize function is found and maximized, which produces the next point, $\theta_{m+1}$, from which to maximize. Further, it goes that every further point's reward is either greater or equal to the previous point. The second improvement to the PG method is a change from the line optimization, where Gradient Descent chooses a direction, and takes a fixed-sized step, whereas, in Trust Region, the algorithm first calculates the maximum sized step, after which it finds the optimal step within that region to take.
 
-It samples actions according to the latest policy, firstly in a random manner. As time goes on the algorithm learns, the actions sampled become less random. Of course, this can mean the algorithm is stuck in a local maxima. This progression, of course, also means the algorithm can get stuck in a local maximum. In these Trust Region optimization algorithms, the quadratic Taylor expansion approximates the objective function. \begin{align*}
+It samples actions according to the latest policy, firstly in a random manner. As time goes on the algorithm learns, the actions sampled become less random. Of course, this can mean the algorithm is stuck in a local maxima. This progression, of course, also means the algorithm can get stuck in a local maximum. In these Trust Region optimization algorithms, the quadratic Taylor expansion approximates the objective function \cite{nocedal_wright_2006}. \begin{align*}
 	\bar{f}(x)&\approx f(x) \\
 	&=f(c)+\nabla J(c)^T(x-c) + \frac{1}{2!}H(c)(x-c)
 \end{align*} here th $J$ is the Jacobian matrix, the first-order part, and $H$ is the Hessian matrix, the second-order part. The trust region, the maximum possible step, is typically calculated as $||x-c||_2\leq \delta$, a hypersphere, where $\delta$ is a threshold parameter and $c$ is a constant. Note, the farther $x$ is from $c$, the less accurate the approximation.
