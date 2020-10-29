@@ -74,8 +74,9 @@ class OrbitDecayEnv(gym.Env):
         self.h = 5.5E5                # Height of satellite 550 km in meters
         self.r_e = 6.371E6            # Radius of earth in meters
         self.r_s = self.h + self.r_e  # Radius from center of earth
-        self.m = 100.0                # Mass of satellite
         self.mp = 75.0                # Mass of propellant
+        self.mf = 25.0                # Mass of satellite w/o propellant
+        self.m = self.mp + self.mf    # Mass of satellite
         self.dt = 1.0                 # Delta t
         self.GM = 3.986004418E14      # Earth's gravitational parameter
         self.C_d = 2.123              # Drag coefficient
@@ -127,8 +128,8 @@ class OrbitDecayEnv(gym.Env):
         self.thrust = np.clip(self.thrust, 0.0, 1.0)
         self.theta += action[1] * np.pi / 3 - np.pi / 6
         self.theta -= (2 * np.pi) * np.floor((self.theta + np.pi) * (1 / (2 * np.pi)))
-        self.r, self.v = calculate_physics(self.r, self.v, self.thrust, self.theta, self.F_t, self.r_e, self.GM, self.m, self.C_d,
-                                           self.A, self.steps, self.dt, self.rho_multiplier)
+        self.r, self.v = calculate_physics(self.r, self.v, self.thrust, self.theta, self.F_t, self.r_e, self.GM, self.m,
+                                           self.C_d, self.A, self.steps, self.dt, self.rho_multiplier)
         # Distance from target
         hd = np.abs(np.linalg.norm(self.r) - self.r_s)
         # Vector distance from target velocity
@@ -137,6 +138,8 @@ class OrbitDecayEnv(gym.Env):
         state = np.concatenate((self.r / self.r_s, self.v / self.orbit_v, [hd, vel, self.theta, self.thrust]))
         # Calculate fuel used
         self.step_fuel_used += self.thrust
+        # Calculate new mass
+        self.m = self.mf + (1 - self.step_fuel_used / self.step_fuel) * self.mp
 
         reward = self.current_step / 800.0 + 0.5
 
@@ -186,7 +189,7 @@ def main():
     model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path, ent_coef=0.00377952,
                  n_steps=256, nminibatches=8, lam=0.944959, gamma=0.994404, noptepochs=4,
                  cliprange=0.0343517, learning_rate=0.000819363)
-    model.learn(total_timesteps=20000000, callback=callback, tb_log_name='PPO2')
+    model.learn(total_timesteps=10000000, callback=callback, tb_log_name='PPO2')
 
 
 def test(n):
@@ -195,6 +198,8 @@ def test(n):
     for i in range(n):
         print(f'i: {i} obs {obs}')
         obs, rewards, dones, info = env.step([0.0, 0.0])
+        if dones:
+            break
 
 
 def objective(trial: optuna.Trial):

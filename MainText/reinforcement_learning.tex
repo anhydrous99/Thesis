@@ -125,13 +125,13 @@ s_m&=\dot{F}_m(\vec{n}_m)(W_{m+1})^T s^{m+1}\\
 
 \subsection{ADAM}
 
-What makes the Adam algorithm so popular is its robustness to changes in its hyper-parameters. It does this by keeping a single learning rate and an adaptive learning rate for different parameters calculated from a first and second gradient moments or moving averages of the gradient. Adam combines two algorithms. AdaGrad and RMSprop, combining their advantages over SGD. It has a couple of extra hyper-parameters, including $\beta_1$, $\beta_2$, and $\epsilon$. $\beta_1$ and $\beta_2$ are hyper-parameters that deal with the two moments, and $\epsilon$ improves numerical stability. IT is calculated by first calculating the current running average, \begin{align*}
+What makes the Adam algorithm so popular is its robustness to changes in its hyper-parameters. It does this by keeping a single learning rate and an adaptive learning rate for different parameters calculated from a first and second gradient moments or moving averages of the gradient. Adam combines two algorithms. AdaGrad and RMSprop, combining their advantages over SGD. It has a couple of extra hyper-parameters, including $\beta_1$, $\beta_2$, and $\epsilon$. $\beta_1$ and $\beta_2$ are hyper-parameters that deal with the two moments, and $\epsilon$ improves numerical stability \cite{kingma_ba_2017}. It is calculated by first calculating the current running average, \begin{align*}
 	k_m(t+1)&\leftarrow \beta_1 k_m(t)+(1-\beta_1)\nabla \vec{f}(\vec{x})\\
 	v_m(t+1)&\leftarrow \beta_2 v_m(t)+(1-\beta_2)(\nabla \vec{f}(\vec{x}))^2\\
 	\hat{k}_m&=\frac{k_m(t+1)}{1-\beta_1^{t+1}}\\
 	\hat{v}_m&=\frac{v_m(t+1)}{1-\beta_2^{t+1}},
 \end{align*} then update the weights, 
-$$w_m(t+1)\leftarrow w_m(t)-\gamma\frac{\hat{k}_m}{\sqrt{\hat{v_m}}+\epsilon} \cite{kingma_ba_2017}.$$
+$$w_m(t+1)\leftarrow w_m(t)-\gamma\frac{\hat{k}_m}{\sqrt{\hat{v_m}}+\epsilon}.$$
 
 \section{Reinforcement Learning}
 
@@ -320,7 +320,7 @@ An improvement to REINFORCE integrates a baseline function. This baseline functi
 
 \subsection{DDPG}
 
-Deep Deterministic Policy Gradient (DDPG) is interesting as it is an adaptation of DQN for environments with continuous action spaces. One of the problem in using DQN for environments with continuous action spaces has to do with the fact that Q-Learning considers a finite number of actions but continuous action spaces have an infinite number of actions. More specifically the $\max$ function used to calculate the loss, Equation~\ref{eq:dqnloss}, is computationally expensive when there are an infinite number of possible actions to choose from. DDPG fixes this by, instead of trying to find the action with the maximum Q-value, having a policy estimate an action which will result in a large Q-value, $max_{b\in A} Q(s,b)\approx Q(s, \pi(s))$.
+Deep Deterministic Policy Gradient (DDPG) is interesting as it is an adaptation of DQN for environments with continuous action spaces. One of the problem in using DQN for environments with continuous action spaces has to do with the fact that Q-Learning considers a finite number of actions but continuous action spaces have an infinite number of actions. More specifically the $\max$ function used to calculate the loss, Equation~\ref{eq:dqnloss}, is computationally expensive when there are an infinite number of possible actions to choose from. DDPG fixes this by, instead of trying to find the action with the maximum Q-value, having a policy estimate an action which will result in a large Q-value, $max_{b\in A} Q(s,b)\approx Q(s, \pi(s))$ \cite{lillicrap_hunt_pritzel_heess_erez_tassa_silver_wierstra_2015}.
 
 This is then combined with some tricks used in DQN, Replay Buffers and Target Networks, results in the DDPG algorithm. The loss function, with Target Networks, is then $$L(s_t, a_t, r_t, s_{t+1})=\big(r_t+\gamma \hat{Q}_t(s_{t+1},\pi(s_{t+1}))-Q_t(s_t,a_t)\big)^2.$$
 
