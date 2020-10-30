@@ -78,9 +78,8 @@ $$a(x)=f(wx + b)|_{w.b}$$
 $w$ and $b$ are weight constants, and $f$ is a transfer function that can be linear or non-linear function and whose purpose is to turn input information into output info—for example, turning input data into 0s and 1s using the piecewise function, thereby turning into a perceptron. A Single Neuron Multiple Input Neural Network is the next simplest. Here, the Neural Network can be described similarly as the perceptron except for the additional function variable, $$a(\vec{x})=f(\vec{w}\cdot \vec{x}+b).$$ The next most straightforward form of the Neural Network is the Neural Network layer, where a Neural Network has multiple inputs and multiple neurons, resulting in multiple output values, or an output vector. 
 $$\vec{a}(\vec{x})=\vec{f}(W\vec{x}+\vec{b})$$ Where $W\vec{x}$ is the Matrix-Vector Multiplication, $$[W\vec{x}]_i=\sum_{j=1}^n [W]_{ij}[\vec{x}]_{j}.$$ 
 
-A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an output layer, and any number of hidden layers. Using the equations so far, it is then possible to build these FNNs. Let us consider this FNN with an arbitrary number of layers, $m$, and an arbitrary number of Neurons per layer. The layer is then 
+A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an output layer, and any number of hidden layers. Using the equations so far, it is then possible to build these FNNs. Let us consider this FNN with an arbitrary number of layers, $m$, and an arbitrary number of Neurons per layer. The layers are then 
 \begin{align*}
-&\text{First Layer} \\
 \vec{a}_1 &= f_1(W_1\vec{x} +\vec{b}_1 )\\
 &\vdots\\
 \vec{a}_i &= f_i(W_i\vec{a}_{i-1}+\vec{b}_i)\\
@@ -90,10 +89,12 @@ A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an
 
 \begin{figure}
 	\centering
-	\includegraphics[scale=0.75]{NNDiagram}
+	\includegraphics[scale=0.55]{NNDiagram}
 	\caption{A diagram of a Feed Forward Neural Network with an input layer, hidden layers, and an output layer.}
 	\label{fig:NNDiagram}
 \end{figure}
+
+\subsection{Convolutional Neural Networks}
 
 \subsection{Loss and Activation Functions}
 
@@ -180,6 +181,13 @@ The model, within the Model-Based algorithm, is beneficial to the agent as it al
 Under Model-Free algorithms, there are two sub-categories, Policy Optimization and Q-Learning based algorithms. The main differentiating factor between the two sub-categories is what the RL algorithm learns. In Policy Optimization-based algorithms, the algorithm directly learn a state to action mapping. The Q-learning based algorithms learns what is called a Q-function that satisfies the Bellman Equation. In other words, a Q-learning based algorithm will learn action from a set of actions by finding the maximum. Some algorithms that fall into Q-learning based algorithms include DQN, Dueling DQN TD3, DDPG, and Rainbow. Some algorithms that belong to the Policy Optimization category is A2C/A3C, TRPO, ACKTR, and PPO. 
 
 Q-Learning based algorithms tend to be off-policy. Meaning, during training, these algorithms can use data from any point in the training processes. Off-policy algorithms train a different policy from generating the data, while On-policy algorithms train on the same policy generating the data.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.75]{Taxonomy}
+	\caption{A diagram of Reinforcement Learning Algorithm's Taxonomy.}
+	\label{fig:rltaxonomy}
+\end{figure}
 
 \subsection{Cross-Entropy Method}
 
@@ -326,7 +334,7 @@ This is then combined with some tricks used in DQN, Replay Buffers and Target Ne
 
 \subsection{A2C/A3C}
 
-Asynchronous Advantage Actor Critic (A3C) and A2C, a derivation of A3C that is synchronous.
+Asynchronous Advantage Actor Critic (A3C) and A2C, a derivative of A3C that is synchronous, is an algorithm first described in a 2016 paper, \cite{mnih_badia_mirza_graves_harley_lillicrap_silver_kavukcuoglu_2016}. This algorithm, fundamentally, is an extension of the REINFORCE with baseline algorithm. It also combines Q-learning via the advantage function, equation~\ref{eq:advantage}.
 
 \subsection{Trust Region Policy Optimization (TRPO)}
 
