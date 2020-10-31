@@ -94,10 +94,6 @@ A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an
 	\label{fig:NNDiagram}
 \end{figure}
 
-\subsection{Convolutional Neural Networks (CNN)}
-
-When applying a Neural Network to large inputs is extremely computationally complex, for instance, if an image that has $128\times 128\times 3$ shape, where the first two dimensions are for the height and width and the third dimension for the channels, in RGB images there are 3, the number of elements amounts to 49152 inputs to the Neural Network. If there are 256 Neurons in a single layer Neural Network then the number of weights approaches 13 million weights in this small Neural Network. Convolutional Neural Networks (CNNs) solves this by using kernels or a matrix of weights that are slide across the image performing matrix multiplication on the sections of the image under which the kernel resides.
-
 \subsection{Loss and Activation Functions}
 
 Loss and Activation functions are an essential part of the Neural Network Architecture. The Loss function is the metric by which Neural Networks are evaluated and trained. On the other had, activation functions allow for the Neural Network's flexibility by giving it non-linearity.
@@ -105,6 +101,61 @@ Loss and Activation functions are an essential part of the Neural Network Archit
 The activation function, in the context of the definition above, is $f_i$. These functions, as I have said before, allow for the non-linearity of the Neural Network. A couple of typically used functions is the cosine, tangent, ReLU, Leaky ReLU, the logistic function, and many others. Each of these different functions has different properties, which makes each function perfect for a particular scenario. For example, in a Convolutional Neural Network, which typically is deep or has many layers, the ReLU or Leaky ReLU function is used as they help prevent the vanishing or exploding gradient problems.
 
 Loss functions turn the raw output of a neural network into something trainable by an optimization algorithm. These loss functions measure the error between the desired value and the value produced by a neural network. One might ask, why not use the accuracy to train? Unfortunately, since the accuracy function is not differentiable, it cannot be used as a loss function and train a neural network. Some typical functions are the mean square error or the l2-loss, the l1-loss, the hinge loss function, the cross-entropy loss, the negative log-likelihood, and many more.
+
+\subsection{Convolutional Neural Networks (CNNs)}
+
+When applying a Neural Network to large inputs is extremely computationally complex, for instance, if an image that has $128\times 128\times 3$ shape, where the first two dimensions are for the height and width and the third dimension for the channels, in RGB images there are 3, the number of elements amounts to 49152 inputs to the Neural Network. If there are 256 Neurons in a single layer Neural Network then the number of weights approaches 13 million weights in this small Neural Network. Convolutional Neural Networks (CNNs) solves this by using kernels or a matrix of weights that are slide across the image performing matrix multiplication on the sections of the image under which the kernel resides.
+
+A CNN's typical architecture consists of Convolutional, Pooling, Fully-Connected, Activation, Batch-Normalization, and Loss Layers. Their configuration varies between CNN and research is ongoing in finding the best configuration of these layers results in better accuracy in differing tasks like image classification. One of the earliest CNN is dubbed LeNet; It was proposed in 1998 by Yann LeCun \cite{lecun1998gradient}. 
+
+\begin{table}
+	\begin{tabularx}{\columnwidth}{|X|X|X|} \hline
+		Layer (type) & Output Shape & \# Params \\ \hline\hline
+		Convolution  & (24, 24, 6) & 156 \\
+		ReLU & (24, 24, 6) & 0 \\
+		MaxPooling & (12, 12, 6) & 0 \\
+		Convolution & (8, 8, 16) & 2,416 \\
+		ReLU & (8, 8, 16) & 0 \\
+		MaxPooling & (4, 4, 16) & 0 \\
+		Fully-Connected & (120) & 30,840 \\
+		ReLU & (120) & 0 \\
+		Fully-Connected & (84) & 10,164 \\
+		ReLU & (84) & 0 \\
+		Fully-Connected & (10) & 850 \\
+		ReLU & (10) & 0 \\ \hline
+	\end{tabularx}
+\caption{Description of the LeNet-5 Convolutional Neural Network}
+\end{table}
+
+The Fully-Connected layer is a synonym for a regular Feed-Forward Neural Network layer. The pooling reduces size of the tensor that it is operating on by looking at slices of said tensor and performing operations. The accumulation of performing the operation on all the slices is put together in a tensor that is smaller. There are many variations of the pooling layer that are differentiated by the operation that is performed. The most common is the MaxPooling Layer that finds that maximum layer of a slice. \begin{align}\label{eq:maxpooling}
+	\text{maxPooling}\Bigg( 
+	\begin{bmatrix}
+		1 & 0 & 2 & 3 \\
+		4 & 6 & 6 & 8 \\
+		3 & 1 & 1 & 0 \\
+		1 & 2 & 2 & 4 
+	\end{bmatrix} 
+\Bigg)=\begin{bmatrix}
+	\text{max} (\begin{bmatrix}
+		1 & 0 \\
+		4 & 6
+	\end{bmatrix}) & \text{max} (\begin{bmatrix}
+	2 & 3 \\
+	6 & 8
+\end{bmatrix}) \\
+\text{max} (\begin{bmatrix}
+	3 & 1 \\
+	1 & 2
+\end{bmatrix}) & \text{max} (\begin{bmatrix}
+	1 & 0 \\
+	2 & 4
+	\end{bmatrix})
+\end{bmatrix}
+=\begin{bmatrix}
+	6 & 8 \\
+	3 & 4
+\end{bmatrix}
+\end{align} In equation~\ref{eq:maxpooling}, the max operation finds the largest element in the matrix.
 
 \section{Back-Propagation, SGD, and ADAM}
 
@@ -145,12 +196,12 @@ In terms of the environment, I will describe the agent as a satellite that is or
 The satellite's actuators are its engines that generate thrust and its angle of thrust. The goal of the agent would then be to try its best to maintain its orbit. The performance measure would be a function of the amount of time it stays within a certain threshold from its orbit altitude. A more detailed and mathematical description is explained in a later section.
 
 \begin{table}
-\caption{A simple description of the environment.}
 \begin{tabularx}{\columnwidth}{|X||X|X|X|X|} \hline
 Agent Type & Performance Measure & Environment & Actuators & Sensors \\ \hline
 Satellite  & How long the satellite is able to maintain it's orbit with the amount of fuel it has. & 
 Low Earth Orbit & The engine and it's angle of thrust. & Relative position, velocity data with respect to earth and it's target orbit, as well as it's current angle and thrust. \\ \hline
 \end{tabularx}
+\caption{A simple description of the environment.}
 \end{table}
 
 The environment is static, single-agent, fully observable sequential, and continuous. Static in that the agent does not have to keep cognizant while it is deliberating. Single-agent, while the environment is expanded to accommodate multiple agents to accelerate training to keep it simple, it is a single-agent environment. It is sequential where the agent's experience cannot be divided into atomic episodes, and every time step requires the last. Finally, it is continuous as the position, velocity, and other attributes are continuous. The actions of thrust and angle will be continuous. 
