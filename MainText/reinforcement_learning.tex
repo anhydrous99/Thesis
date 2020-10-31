@@ -94,7 +94,9 @@ A Feed-Forward Neural Network's basic anatomy is then an initial input layer, an
 	\label{fig:NNDiagram}
 \end{figure}
 
-\subsection{Convolutional Neural Networks}
+\subsection{Convolutional Neural Networks (CNN)}
+
+When applying a Neural Network to large inputs is extremely computationally complex, for instance, if an image that has $128\times 128\times 3$ shape, where the first two dimensions are for the height and width and the third dimension for the channels, in RGB images there are 3, the number of elements amounts to 49152 inputs to the Neural Network. If there are 256 Neurons in a single layer Neural Network then the number of weights approaches 13 million weights in this small Neural Network. Convolutional Neural Networks (CNNs) solves this by using kernels or a matrix of weights that are slide across the image performing matrix multiplication on the sections of the image under which the kernel resides.
 
 \subsection{Loss and Activation Functions}
 
