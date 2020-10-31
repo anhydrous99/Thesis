@@ -159,7 +159,7 @@ The Fully-Connected layer is a synonym for a regular Feed-Forward Neural Network
 \end{align} In equation~\ref{eq:maxpooling}, the max operation finds the largest element in the matrix. The pooling layer reduces the number of required parameters in subsequent layers which reduces computational cost at little to no degradation of performance. \cite{geron_aurelien_2019}
 
 The most important part of a CNN is the Convolutional Layer. As described above, kernels are slid across the image while, at each step, performing matrix multiplication. This allows for different values to share weights. \begin{equation}\label{eq:convolution}
-	\text{Conv}\Bigg(\begin{bmatrix}
+	\text{Conv2D}\Bigg(\begin{bmatrix}
 		1 & 0 & 2 & 3 \\
 		4 & 6 & 6 & 8 \\
 		3 & 1 & 1 & 0 \\
@@ -167,9 +167,12 @@ The most important part of a CNN is the Convolutional Layer. As described above,
 	\end{bmatrix}, \begin{bmatrix}
 	1 & 2 \\ 3 & 4
 \end{bmatrix}\Bigg)=\begin{bmatrix}
-	
+	37 & 46 & 58 \\
+	29 & 25 & 25 \\
+	16 & 17 & 23
 \end{bmatrix}
 \end{equation}
+The kernel size, the number of kernels, and the sliding stride for said kernel are all hyper-parameters. In equation~\ref{eq:convolution}, the first parameter would be the input image, the second a single kernel, you can more than one, has with a stride of 1, $p$ number of padding zeros can be added to the edges prior to the convolution, and there wasn't a bias added, as there normally would. Notice the shape of the output is the original input's height and width minus one, this output size can be calculated via $$\frac{w-k+2p}{s}+1$$ where $w$ is the input size, $k$ is the kernel size, $p$ is the padding, and $s$ is the stride.
 
 \section{Back-Propagation, SGD, and ADAM}
 
