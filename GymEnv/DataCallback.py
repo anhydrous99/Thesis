@@ -2,6 +2,7 @@ from stable_baselines.common.callbacks import BaseCallback
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from utils import increment_filename
 
 
 class DataCallback(BaseCallback):
@@ -40,7 +41,9 @@ class DataCallback(BaseCallback):
         df = pd.DataFrame(self.data)
         if self.plot:
             df['avg'].plot()
-            plt.show()
             if self.plot_name is not None:
-                plt.savefig(self.plot_name)
-        df.to_csv(self.file_name)
+                plot_path = increment_filename(self.plot_name)
+                plt.savefig(plot_path)
+            plt.show()
+        csv_path = increment_filename(self.file_name)
+        df.to_csv(csv_path)
