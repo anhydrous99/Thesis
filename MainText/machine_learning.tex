@@ -281,7 +281,7 @@ Q-Learning is a Model-free off-policy algorithm that uses tabulation. The Q in Q
 \end{equation}
  The next action is chosen by $\max_{b\in A} Q_t(s_{t+1},b)$. Q-Learning tends to be combined with the $\epsilon$-greedy method to counteract and underfit and improve exploration. With the $\epsilon$-greedy method the chosen action becomes $$a_{\text{next}}=\begin{cases}\max_{b\in A} Q_t(s_{t+1},b) & \text{with probability }1-\epsilon \\ \text{random action}  & \text{with probability }\epsilon\end{cases}.$$
 
-\subsection{Deep Q-Network (DQN)}
+\subsection{Deep Q-Network (DQN)}\label{subsec:DQN}
 
 At a point, the number of state-action pairs, Q-values in the table becomes too large and too computationally expensive. A solution presented on a 2013 paper by DeepMind replaced this computationally expensive table with a Neural Network that maps the state and action to Q \cite{mnih_kavukcuoglu_silver_graves_antonoglou_wierstra_riedmiller_2013}. Unfortunately, just doing this replacement doesn't result in a stable algorithm for all environments. For instance, an environment with sparse rewards could result, when training, in non-convergence due to the imperfect initial Q representation. The $\epsilon$-greedy method helps in this respect, but there are many different optimizations, including Dueling and Double DQN, Prioritized Experience Replay, Noisy Nets, target networks, and others. This algorithm and it's variants works exceptionally well in Atari game environments, that have a large state space and small action space, where it uses a Convolutional Neural Network and the loss function optimized using SGD or ADAM, 
 \begin{equation}\label{eq:dqnloss}
@@ -404,7 +404,7 @@ This is then combined with some tricks used in DQN, Replay Buffers and Target Ne
 
 \subsection{A2C/A3C}
 
-Asynchronous Advantage Actor Critic (A3C) and A2C, a derivative of A3C that is synchronous, is an algorithm first described in a 2016 paper, \cite{mnih_badia_mirza_graves_harley_lillicrap_silver_kavukcuoglu_2016}. This algorithm, fundamentally, is an extension of the REINFORCE with baseline algorithm. It, by using the advantage, takes into account not just the state-action value, $Q_\pi (s, a)$, for a policy but also the state's value, $V(s)$, as described in equation~\ref{eq:advantage}. 
+Asynchronous Advantage Actor Critic (A3C) and A2C, a derivative of A3C that is synchronous, is an algorithm first described in a 2016 paper, \cite{mnih_badia_mirza_graves_harley_lillicrap_silver_kavukcuoglu_2016}. This algorithm, fundamentally, is an extension of the REINFORCE with baseline algorithm. It, by using the advantage, takes into account not just the state-action value, $Q_\pi (s, a)$, for a policy but also the state's value, $V(s)$, as described in equation~\ref{eq:advantage}. The 2016 paper described several variants including Asynchronous one-step Q-learning, one-step Sarsa, n-step Q-learning, and finally A3C. A problem that plagues the use of Q-values, as described in the section~\ref{subsec:DQN}, to create algorithms is the correlation between samples, which DQN mitigates by using large experience buffers, A3C solves by using multiple asynchronous environments, the paper's results really make this problem apparent while showing A3C comparative performance.
 
 \subsection{Trust Region Policy Optimization (TRPO)}
 
@@ -425,4 +425,4 @@ This algorithm's complexity steps from the required calculation of the approxima
 
 \subsection{Proximal Policy Optimization (PPO)}
 
-PPO differs from TRPO as PPO is a first-order method, but like TRPO, it aims to take the broadest possible step without degrading performance.
+PPO is one of the most widely used RL algorithm out there. 
