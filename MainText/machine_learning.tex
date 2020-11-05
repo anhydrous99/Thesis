@@ -355,7 +355,13 @@ One of the simplest is REINFORCE; it is a Monte-Carlo version of the Policy Grad
 \begin{align*}
 	\nabla J(\theta)&\propto \sum_s \mu(s) \sum_a q_\pi (s, a)\nabla_{\theta} \pi (a|s, \theta) \\
 	&=\mathbb{E}_\pi \bigg[\sum_a q_\pi(s_s, a)\nabla_\theta \pi(a|s_t, \theta)\bigg].
-\end{align*} After manipulation, this equation yields to the estimate of $\nabla J(\theta)$ ,$$\nabla J(\theta)=\mathbb{E}\bigg[G_t \frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}\bigg]\bigg|a_t\in \text{possible actions},$$ which, when plugging into the parameter update, we get the following equation, $$\theta_{t+1}=\theta_t+\alpha G_t\frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}=\theta_t + \alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta).$$ Notice how the identity $\frac{\nabla x}{x}=\nabla \ln x$ is used.
+\end{align*} After manipulation, this equation yields to the estimate of $\nabla J(\theta)$ ,\begin{equation*}\nabla J(\theta)=\mathbb{E}\bigg[G_t \frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}\bigg]\bigg|a_t\in \text{possible actions},
+\end{equation*} which, when plugging into the parameter update, we get the following equation, \begin{align*}
+\theta_{t+1}&=\theta_t+\alpha G_t\frac{\nabla_\theta \pi(a_t|s_t, \theta)}{\pi(a_t|s_t, \theta)}\\&=\theta_t + \alpha G_t \nabla_\theta \ln \pi(a_t|s_t, \theta).
+\end{align*} Notice how the identity $\frac{\nabla x}{x}=\nabla \ln x$ is used to result in the objective function \begin{equation}
+\nabla J(\theta)=\mathbb{E}[G_t \nabla_\theta \ln \pi (a_t | s_t, \theta)].
+\label{eq:REINFORCE_objective}
+\end{equation}
 
 \begin{algorithm}
 	\SetAlgoLined
@@ -425,6 +431,8 @@ This algorithm's complexity steps from the required calculation of the approxima
 
 \subsection{Proximal Policy Optimization (PPO)}
 
-PPO is a simplification of TRPO and in some or most cases is able to outperform TRPO. In fact, this algorithm has become one of the most widely used algorithms in RL, especially in environments that have a continuous action space. \cite{broida2019spacecraft, lillicrap_hunt_pritzel_heess_erez_tassa_silver_wierstra_2015, oestreich2020autonomous} all are in the realm of applying reinforcement learning to orbital mechanics and use PPO. Hence, PPO is primarily evaluated within the environment created.
+PPO attempts to be simpler than TRPO and in some or most cases is able to outperform TRPO. In fact, this algorithm has become one of the most widely used algorithms in RL, especially in environments that have a continuous action space. Not only is PPO simpler to implement than TRPO, PPO is just as sample efficient. \cite{broida2019spacecraft, lillicrap_hunt_pritzel_heess_erez_tassa_silver_wierstra_2015, oestreich2020autonomous} all are in the realm of applying reinforcement learning to orbital mechanics and use PPO. To quote \cite{schulman_wolski_dharwal_radford_klimov_2017}, "These methods have the stability and reliability of trust-region methods but are much simpler to implement, requiring only a few lines of code change to a vanilla policy gradient implementation." Hence, PPO is primarily evaluated within the environment created here. 
 
-One of the set backs of TRPO that PPO fixes is it's need for the calculation of the Hessian Matrix, which is a second-order operation. Like TRPO, PPO utilizes the MM algorithm and Trust Region Optimization. PPO specifically relies on the KL-divergence to measure the step size for it's Trust Region Optimization, $$D_{KL}(P||Q)=\mathbb{E}_x\log \frac{P(x)}{Q(x)}.$$
+One of the set backs of TRPO that PPO fixes is its need for the calculation of the Hessian Matrix, which is a second-order operation. There are two variants which solves this problems by reducing the problem to a first-order operation in two different ways, PPO-Penalty and PPO-Clip. PPO-Clip relies on what is called the Clipped Surrogate Objective and PPO-Penalty which relies on the Adaptive KL Penalty Coefficient. Adaptive KL Penalty Coefficient adds a penalty to the KL-Divergence mentioned in TRPO. PPO-Clip replaces the Policy Gradient Objective function, equation~\ref{eq:REINFORCE_objective}, with the Clipped Surrogate Objective, \begin{equation*}
+	\nabla J(\theta)=\mathbb{E}[\min (r(\theta)A_t, \text{clip}(r(\theta), 1-\epsilon, 1+\epsilon))]
+\end{equation*} Where $r(\theta)=\frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$, $A_t$ is the advantage, $\epsilon$ is a hyper-parameter with the typical value of $\epsilon=0.2$.
