@@ -425,4 +425,6 @@ This algorithm's complexity steps from the required calculation of the approxima
 
 \subsection{Proximal Policy Optimization (PPO)}
 
-PPO is one of the most widely used RL algorithm out there. 
+PPO is a simplification of TRPO and in some or most cases is able to outperform TRPO. In fact, this algorithm has become one of the most widely used algorithms in RL, especially in environments that have a continuous action space. \cite{broida2019spacecraft, lillicrap_hunt_pritzel_heess_erez_tassa_silver_wierstra_2015, oestreich2020autonomous} all are in the realm of applying reinforcement learning to orbital mechanics and use PPO. Hence, PPO is primarily evaluated within the environment created.
+
+One of the set backs of TRPO that PPO fixes is it's need for the calculation of the Hessian Matrix, which is a second-order operation. Like TRPO, PPO utilizes the MM algorithm and Trust Region Optimization. PPO specifically relies on the KL-divergence to measure the step size for it's Trust Region Optimization, $$D_{KL}(P||Q)=\mathbb{E}_x\log \frac{P(x)}{Q(x)}.$$
