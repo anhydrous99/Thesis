@@ -4,6 +4,10 @@ This chapter aggregates the previous information and introduces the Reinforcemen
 
 \section{Environment Description}
 
+The dynamics of the environment follows that of the physics of Chapter~\ref{ch:physics}. The base of the environment revolves around Algorithm~\ref{alg:problemsim} using the 4th Order Yoshida integrator to calculate the next step's velocity and position from the previous velocity and position and the state's acceleration calculated from the gravitational force and the amplified Drag. 
+
+One aspect of the Environment not yet described in Chapter~\ref{ch:physics} and Section~\ref{sec:reinforcement_learning} is how the satellite agent interacts with it's environment. The maximum force of propulsion of the satellite is a fraction of that of Ion Thruster at $0.04$ Newtons and, it being in a 2D-world or on a plane in a 3D-world, restricting its angle of thrust to a single degree of freedom with values between 0\si{\degree} and 360\si{\degree}. The agent operates in continuous action space with 2 values between 0 and 1. These two input values are not directly map to $[0, 0.04]$ for thrust and $[0, 360)$ as would be natural, but, to reduce variance, it is instead mapped to a delta of the thrust and angle values.
+
 \section{Distributed Hyper-parameter Optimization}
 
 \section{Training \& Evaluation}
