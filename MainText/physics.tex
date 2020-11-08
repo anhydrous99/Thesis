@@ -58,7 +58,7 @@ The comparison of thermospheric density, (Pardini \& Anselmo, 2001), concluded t
 \rho=\frac{P}{0.2869(T+27301)}
 \end{equation} where $$T=-131.21+0.00299h$$ and $$P=2.488\bigg(\frac{T+273.1}{216.6}\bigg)^{-11.388}.$$
 We can reformulate the equation as 
-\begin{equation}
+\begin{equation}\label{eq:density}
 \rho=\frac{1}{(7.8974\times10^{-24}+8.69106\times10^{-31}h)(141.89+0.00299h)^{11.388}}.
 \end{equation} Where $h$ is the height from earth's surface.
 
@@ -71,7 +71,7 @@ If we use a starting circular orbit, then the initial velocity would be $v_0=\sq
 , where $F$ is said force, $I_s$ is said specific impulse, and $g$ is the gravitational acceleration at 300 km from the surface, $8.958\frac{m}{s^2}$, so $\dot{m}=1.11632\times 10^{-5}\frac{kg}{\text{sec}}$ \cite{sutton_biblarz_2017}. This comes hand in hand with the Tsiolkovsky rocket equation, $$\Delta v=I_{sp}g\frac{m_0}{m_f}.$$ Where $m_0$ is the initial mass including the mass of the propellant and $m_f$ is the mass of without the propellant. With respect to the created environment the calculation of the $\Delta v$ is not required as but by adjusting the mass of the satellite after each step the expulsion of the propellant is simulated. In fact, this calculation can be simplified to a hyper-parameter whose value is a positive integer, a count for the number of steps the satellite has fuel for if at full thrust.
 
 To put everything together, let's start building our equations of motion and finally our algorithm for the problem. We start by calculating the net force on our satellite, which is the sum of all forces on the satellite. 
-\begin{equation}
+\begin{equation}\label{eq:force}
 \vec{F}=-G\frac{m_e m}{|\vec{r}|^2}\hat{r}-\frac{1}{2}\rho v^2 C_d A\hat{v}
 \end{equation}
 After calculating the resulting acceleration vector using equation~\ref{eq:newton}, calculate the next time step's velocity and position. This results in Algorithm~\ref{alg:problemsim}. In this algorithm, the calculate\_next function is left vague on purpose as in the next section the best way to calculate the next step's velocity and position from the last step's velocity, position, and acceleration is discussed.
