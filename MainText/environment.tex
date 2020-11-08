@@ -22,14 +22,14 @@ r_t = \begin{cases}
 $$ 
 Where $r_{\text{targ}}$ is the distance from the target orbit, $r_{\text{threshold}}$ is the threshold, $f_{\text{used}}$ is the amount of fuel used, $f_{\text{available}}$ is the amount of fuel available, and $t_{\text{step}}$ is the number of steps since the start of the episode. If the environment's episode reaches 800 steps it is ended.
 
-Figure 
-
 \begin{figure}
 	\centering
 	\includegraphics{OrbitDiagram}
-	\caption{A diagram of the orbit and orbital termination threshold.}
+	\caption{A diagram of the target orbit and the termination orbital threshold.}
 	\label{fig:OrbitDiagram}
 \end{figure}
+
+Normally calculating the acceleration, the velocity and position using the 4th order yoshida integrator is computationally expensive, especially because the language, python, used is not a compiled language. This is mitigated using the Numba \cite{10.1145/2833157.2833162} library. Using Numba, the portion of the code that calculates the acceleration and calculates the 4th order yoshida integration are compiled to binary using a Just-in-time (JIT) compiler.
 	
 \section{Distributed Hyper-parameter Optimization}
 
