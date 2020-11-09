@@ -2,7 +2,6 @@ from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import set_global_seeds
-from stable_baselines.common.callbacks import EvalCallback, CallbackList
 from gym.wrappers.time_limit import TimeLimit
 from DataCallback import DataCallback
 from stable_baselines import PPO2

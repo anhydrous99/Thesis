@@ -448,14 +448,17 @@ PPO-Penalty, on the other hand, uses a penalty to the KL-Divergence called the A
 \end{equation*} Where $$d=\mathbb{E}\big[KL[\pi_{\theta_{\text{old}}}(\cdot | s_t), \pi_\theta(\cdot | s_t)]\big],$$ $d_\text{targ}$ is a divergence target for each policy update, and $\beta$'s initial value is a hyper-parameter whose value, according to introductory paper \cite{schulman_wolski_dharwal_radford_klimov_2017}, is unimportant as it is adjusted by the algorithm.
 
 The paper, \cite{schulman_wolski_dharwal_radford_klimov_2017}, extends the Clipped Surrogate Object with an entropy bonus to ensure exploration in the exploration v. exploitation balance. \begin{equation}\label{eq:PPO_objective}
-\nabla J(\theta)=\mathbb{E}\big[\nabla J_{\text{clip}}(\theta) - c_1 L_{VF}(\theta)+c_2 S[\pi_\theta](s_t)\big]\end{equation} Where $c_1$ and $c_1$ are coefficient, $S$ is the entropy bonus, and $L_{VF}(\theta)=(V(s_t)-V_{target})^2$ is the squared-error loss.
+\nabla J(\theta)=\mathbb{E}\big[\nabla J_{\text{clip}}(\theta) - c_1 L_{VF}(\theta)+c_2 S[\pi_\theta](s_t)\big]\end{equation} Where $c_1$ and $c_1$ are coefficient, $S$ is the entropy bonus, and $L_{VF}(\theta)=(V(s_t)-V_{target})^2$ is the squared-error loss. The generalized estimation of the advantage function, used in \cite{schulman_wolski_dharwal_radford_klimov_2017}, is $$A_t=\delta_t+(\gamma\lambda)\delta_{t+1}+\cdots+(\gamma\lambda)^{T-t+1}\delta_{T-1},$$ where $\delta_t=r_t+\gamma V(s_{t+1})-V(s_t)$ and $T$ is the length of the trajectory segment.
 
 \begin{algorithm}\label{algo:PPO}
 	\SetAlgoLined
 	\DontPrintSemicolon
 	\KwIn{An initial policy with parameters $\theta$ and initial function parameters $\phi$}
 	\For{$k=0, 1, 2, \cdots$ until convergence}{
-		
+		Run environment using policy $\pi_k=\pi(\theta)$\\
+		Compute advantage estimate based on the value function\\
+		Optimize surrogate function $\nabla J$ with respect to $\theta$ using $K$ epochs and minibatch size $M\leq NT$\\
+		$\theta_t \leftarrow \theta_{t+1}$\\
 	}
-	\caption{Proximal Policy Optimization Algorithm w/\ Clipped Surrogate Objective}
+	\caption{Proximal Policy Optimization Algorithm}
 \end{algorithm}

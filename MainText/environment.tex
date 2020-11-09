@@ -14,12 +14,12 @@ The observation space is also continuous of size 8. It includes the normalized p
 $$[r_x, r_y, v_x, v_y, r_{\text{targ}}, v_{\text{targ}}, \theta, F_{\text{thrust}}].$$
 Where $r_{targ}=|||\vec{r}||_2 - r_\text{orbital}|$, $v_{\text{targ}}=|||\vec{v}||_2-v_\text{orbital}|$, $||x||_2$ is the euclidean norm operation, $|x|$ is the absolute value operation, $r_\text{orbital}$ is the starting radius, $\vec{r}$ is the current position of the satellite, and $\vec{v}$ is the current velocity of the satellite. The action space, as mentioned before, is continuous, has a size of 2, and includes the thrust delta and the angle delta, $$[\Delta F_{\text{thrust}}, \Delta \theta].$$ 
 
-For every step, the reward signal consists of the current step of the environment divided by 800 plus 0.5 and if the agent either crosses the orbital termination threshold or if it runs out of fuel the episode ends with 0 reward for that step. This linear increase of the reward per step encourages the agent to both not run out of fuel and stay within the orbital termination threshold. $$
+For every step, the reward signal consists of the current step of the environment divided by 800 plus 0.5 and if the agent either crosses the orbital termination threshold or if it runs out of fuel the episode ends with 0 reward for that step. This linear increase of the reward per step encourages the agent to both not run out of fuel and stay within the orbital termination threshold. \begin{equation}\label{eq:reward}
 r_t = \begin{cases}
 	0 & \mbox{if }r_{\text{targ}}>r_{\text{threshold}}\lor f_{\text{used}}>f_{\text{available}} \\
 	\frac{t_{\text{step}}}{800} + 0.5 & \mbox{otherwise}
 \end{cases}
-$$ 
+\end{equation}
 Where $r_{\text{targ}}$ is the distance from the target orbit, $r_{\text{threshold}}$ is the threshold, $f_{\text{used}}$ is the amount of fuel used, $f_{\text{available}}$ is the amount of fuel available, and $t_{\text{step}}$ is the number of steps since the start of the episode. If the environment's episode reaches 800 steps it is ended. 
 
 \begin{figure}
@@ -30,6 +30,28 @@ Where $r_{\text{targ}}$ is the distance from the target orbit, $r_{\text{thresho
 \end{figure}
 
 Normally calculating the acceleration, the velocity and position using the 4th order yoshida integrator is computationally expensive, especially because the language, python, used is not a compiled language. This is mitigated using the Numba \cite{10.1145/2833157.2833162} library. Using Numba, the portion of the code that calculates the acceleration and calculates the 4th order yoshida integration are compiled using a Just-in-time (JIT) compiler.
+
+The python Reinforcement Learning library stable-baselines' PPO algorithm implementation was used. stable-baseline is a fork of the baseline library created OpenAI and improves upon it. It uses the PPO-Clip variant of the PPO algorithm.
+
+The environment is built on-top of the python framework laid out by the OpenAI's Gym \cite{DBLP:journals/corr/BrockmanCPSSTZ16}. All of Gym's environment, including this environment, inherit their Env object which lays out a standard set of functions to override when creating an environment that inherently works with most Reinforcement Learning libraries out there. The functions to override includes the seed function that generates a random seed or takes in a seed from the user, the reset function that resets the environment and is run between episodes, it returns the initial observation of the environment, the step function that moves the environment a single step forward, which takes in the actions to take and returns the next step's observed state, it's reward, and whether the episode has reached termination. The step function can be seen in pseudo-code form in Algorithm~\ref{algo:step}.
+
+\begin{algorithm}\label{algo:step}
+	\SetAlgoLined
+	\DontPrintSemicolon
+	\KwIn{Input action tuple $(a_1, a_2)$, both values of which are between 0 and 1.}
+	\KwData{The satellite's last position $\vec{r}$, velocity $\vec{v}$, thrust $t$, angle $\theta$, and fuel used $f_{\text{used}}$.}
+	$\text{thrust}\leftarrow \text{clip}(t + 0.04 a_1 - 0.02, 0.0, 1.0)$\\
+	$\theta\leftarrow \text{wrap}(\theta + \frac{\pi a_2}{3}-\frac{\pi}{6})$\\
+	$\vec{r}, \vec{v}\leftarrow$calculate\_physics$(\vec{r}, \vec{v}, \text{thrust}, \theta)$\\
+	$r_{\text{targ}}=|||\vec{r}||_2-r_{\text{orbital}}|$ \\
+	$v_{\text{targ}}=|||\vec{v}||_2-v_{\text{orbital}}|$ \\
+	$f_{\text{used}}\leftarrow f_{\text{used}}+t$\\
+	$m\leftarrow m_f+\big(1-\frac{f_{\text{used}}}{f_{\text{available}}}\big)m_p$\\
+	reward$=$Equation~\ref{eq:reward}\\
+	done$\leftarrow r_{\text{targ}}>$threshold$\lor f_{\text{used}}>$fuel threshold\\
+	\Return $\vec{r}, \vec{v}, r_{\text{targ}}, v_{\text{targ}}, \theta, t,$reward, done
+	\caption{Calculate the environment's next step.}
+\end{algorithm}
 	
 \section{Hyper-parameters \& Distributed Hyper-parameter Optimization}
 
