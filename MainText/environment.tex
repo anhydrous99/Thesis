@@ -29,7 +29,7 @@ Where $r_{\text{targ}}$ is the distance from the target orbit, $r_{\text{thresho
 	\label{fig:OrbitDiagram}
 \end{figure}
 
-Normally calculating the acceleration, the velocity and position using the 4th order yoshida integrator is computationally expensive, especially because the language, python, used is not a compiled language. This is mitigated using the Numba \cite{10.1145/2833157.2833162} library. Using Numba, the portion of the code that calculates the acceleration and calculates the 4th order yoshida integration are compiled to binary using a Just-in-time (JIT) compiler.
+Normally calculating the acceleration, the velocity and position using the 4th order yoshida integrator is computationally expensive, especially because the language, python, used is not a compiled language. This is mitigated using the Numba \cite{10.1145/2833157.2833162} library. Using Numba, the portion of the code that calculates the acceleration and calculates the 4th order yoshida integration are compiled using a Just-in-time (JIT) compiler.
 	
 \section{Hyper-parameters \& Distributed Hyper-parameter Optimization}
 
