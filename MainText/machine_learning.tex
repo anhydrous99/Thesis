@@ -435,17 +435,20 @@ PPO attempts to be simpler than TRPO and in some or most cases is able to outper
 
 One of the set backs of TRPO that PPO fixes is its need for the calculation of the Hessian Matrix, which is a second-order operation. There are two variants which solves this problems by reducing the problem to a first-order operation in two different ways, PPO-Penalty and PPO-Clip. PPO-Clip relies on what is called the Clipped Surrogate Objective and PPO-Penalty which relies on the Adaptive KL Penalty Coefficient. Adaptive KL Penalty Coefficient adds a penalty to the KL-Divergence mentioned in TRPO. \cite{schulman_wolski_dharwal_radford_klimov_2017} found PPO-Penalty performed worse than PPO-Clip.
 
-PPO-Clip replaces the Policy Gradient Objective function, equation~\ref{eq:REINFORCE_objective}, with the Clipped Surrogate Objective, \begin{equation*}
-	\nabla J(\theta)=\mathbb{E}[\min (r(\theta)A_t, \text{clip}(r(\theta), 1-\epsilon, 1+\epsilon) A_t)]
-\end{equation*} Where $r(\theta)=\frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$, $A_t$ is the advantage, $\epsilon$ is a hyper-parameter with the typical value of $\epsilon=0.2$. OpenAI's implementation of this algorithm uses the PPO-Clip variant due to its better performance and is the variant evaluated within the environment created here \cite{achiam_2020}.
+PPO-Clip replaces the Policy Gradient Objective function, equation~\ref{eq:REINFORCE_objective}, with the Clipped Surrogate Objective, \begin{equation}\label{eq:PPO_clip_objective}
+	\nabla J_{\text{clip}}(\theta)=\mathbb{E}[\min (r(\theta)A_t, \text{clip}(r(\theta), 1-\epsilon, 1+\epsilon) A_t)]
+\end{equation} Where $r(\theta)=\frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$, $A_t$ is the advantage, $\epsilon$ is a hyper-parameter with the typical value of $\epsilon=0.2$. OpenAI's implementation of this algorithm uses the PPO-Clip variant due to its better performance and is the variant evaluated within the environment created here \cite{achiam_2020}.
 
-PPO-Penalty, on the other hand, uses a penalty to the KL-Divergence called the Adaptive KL Penalty Coefficient, $$\nabla J(\theta)=\mathbb{E}\big[r(\theta)A_t - \beta KL[\pi_{\theta_\text{old}}(\cdot | s_t), \pi_\theta (\cdot | s_t)]\big].$$ Here, $KL$ is the KL-Divergence and $\beta$ is a hyper-parameter that is updated via 
+PPO-Penalty, on the other hand, uses a penalty to the KL-Divergence called the Adaptive KL Penalty Coefficient, $$\nabla J_{\text{penalty}}(\theta)=\mathbb{E}\big[r(\theta)A_t - \beta KL[\pi_{\theta_\text{old}}(\cdot | s_t), \pi_\theta (\cdot | s_t)]\big].$$ Here, $KL$ is the KL-Divergence and $\beta$ is a hyper-parameter that is updated via 
 \begin{equation*}
 	\beta \leftarrow \begin{cases}
 		\frac{\beta}{2} &\mbox{if }d<\frac{d_{\text{targ}}}{1.5} \\
 		2\times \beta &\mbox{if }d>1.5\times d_{\text{targ}}.
 	\end{cases}
 \end{equation*} Where $$d=\mathbb{E}\big[KL[\pi_{\theta_{\text{old}}}(\cdot | s_t), \pi_\theta(\cdot | s_t)]\big],$$ $d_\text{targ}$ is a divergence target for each policy update, and $\beta$'s initial value is a hyper-parameter whose value, according to introductory paper \cite{schulman_wolski_dharwal_radford_klimov_2017}, is unimportant as it is adjusted by the algorithm.
+
+The paper, \cite{schulman_wolski_dharwal_radford_klimov_2017}, extends the Clipped Surrogate Object with an entropy bonus to ensure exploration in the exploration v. exploitation balance. \begin{equation}\label{eq:PPO_objective}
+\nabla J(\theta)=\mathbb{E}\big[\nabla J_{\text{clip}}(\theta) - c_1 L_{VF}(\theta)+c_2 S[\pi_\theta](s_t)\big]\end{equation} Where $c_1$ and $c_1$ are coefficient, $S$ is the entropy bonus, and $L_{VF}(\theta)=(V(s_t)-V_{target})^2$ is the squared-error loss.
 
 \begin{algorithm}\label{algo:PPO}
 	\SetAlgoLined

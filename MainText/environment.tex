@@ -35,7 +35,26 @@ Normally calculating the acceleration, the velocity and position using the 4th o
 
 Here, Optuna \cite{DBLP:journals/corr/abs-1907-10902} was used to optimize the PPO hyper-parameter. Optuna is a hyper-parameter optimization framework that automates the hyper-parameter search. Unfortunately, due to the large number of hyper-parameters the search space is very large and difficult to search with one machine. To mitigate this the distributed feature of Optuna was used.
 
-This Optuna feature involves creating a MySQL server which is then used by the workers to coordinate the optimization. A MySQL management service was created called OptunaExplorer to dynamically interact and manage the MySQL server as the workers optimize. A run when optimizing is called a trial and a set of trials to optimize a problem is called a study, in Optuna. The study to optimize the PPO hyper-parameters for this environment ran for 536 trials using 9 workers.
+This Optuna feature involves creating a MySQL server which is then used by the workers to coordinate the optimization. A MySQL management service was created called OptunaExplorer to dynamically interact and manage the MySQL server as the workers optimize. A run when optimizing is called a trial and a set of trials to optimize a problem is called a study, in Optuna. The study to optimize the PPO hyper-parameters for this environment ran for 536 trials using 9 workers spread evenly across 3 computers utilizing GPU acceleration.
+
+The optimized hyper-parameters include the lambda, or the GAE parameter used to control the balance between bias and variance, $\gamma$ or the discount factor from equation~\ref{eq:discountedreward}, the learning rate which is used with the Adam Optimizer used to train the algorithm, the Entropy Coefficient, $c_1$ from equation~\ref{eq:PPO_objective}, is used to prevent premature convergence, and the Clipping parameter, $\epsilon$ from equation~\ref{eq:PPO_clip_objective}. The rest of the parameters were not explicitly optimized.
+
+\begin{table}
+	\begin{tabularx}{\columnwidth}{|c|c|X|} \hline
+		Hyper-parameter & Value & Description \\\hline
+		$\gamma$ & $0.994404$ & Discount Factor\\\hline
+		$n_{\text{steps}}$ & 256 & Number of steps for each environment update. \\\hline
+		$c_1$ & 0.00377952 & Entropy Coefficient \\\hline
+		Learning rate & 0.000819363 & Used with the Adam Optimizer \\\hline
+		$c_2$ & 0.5 & Value function coefficient used with equation~\ref{eq:PPO_objective}. \\\hline
+		Gradient Clipping & 0.5 & Limits weight changes when updating Neural Networks. \\\hline
+		$\lambda$ & 0.944959 & GAE Coefficient \\\hline
+		$n_{\text{minibatches}}$ & 8 & Number of mini-batches to train for per update. \\\hline
+		$n_{\text{opteochs}}$ & 4 & Epochs to train surrogate \\\hline
+		$\epsilon$ & 0.0343517 & Clipping parameter from equation~\ref{eq:PPO_clip_objective} \\\hline
+	\end{tabularx}
+	\caption{PPO hyper-parameters used for the environment introduced.}
+\end{table}
 
 \section{Training \& Evaluation}
 
