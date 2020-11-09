@@ -21,10 +21,16 @@ Newton's second law of motion describes the relationship between force and accel
 Now, there are categories of forces, Contact Forces and Action-at-a-Distance Forces. The differentiating factor between the two categories is that the Contact Forces, as the name implies, requires two object's to be in contact and Action-at-a-Distance Forces are applied, as the name implies, at a distance. In the vacuum of space the main force that is active is the Force of Gravity.
 
 The force of gravity, and most Action-at-a-Distance Forces, exist by the inverse-square law, where it's amount is inversely proportional to the distance from the source of the force, here gravity. $$F\propto \frac{1}{r^2}$$ In 1687 Newton's Principia postulated what is now called Newton's Law of Universal Gravitation \cite{rohrlich_1999}. $$F_{21}=-G\frac{m_1m_2}{r^2}$$ or in vector notation 
-\begin{equation}
+\begin{equation}\label{eq:pointm}
 \vec{F}_{21}=-G\frac{m_1m_2}{|\vec{r}_{12}|^2}\hat{r}_{12}
 \end{equation}
  where $\hat{r}$ is the unit vector of $r$.
+ 
+ \begin{figure}
+ 	\centering
+ 	\includegraphics[scale=0.6]{GravityForce}
+ 	\caption{A pictorial representation of equation~\ref{eq:pointm} where a point mass $m_1$ influences another point mass $m_2$ and vice versa.}
+ \end{figure}
 
 Newton's Law of Universal Gravitation gives us the key to the story between objects in the vacuum of space. For instance, if we have $n$ objects, the force on object 1 is $$F_1=\sum_{i=2}^n{G\frac{m_1 m_i}{r_{1i}^2}}$$ and, as we see for the calculation for object 1, the computational complexity for a single object is $O(n)$ and therefore to calculate the force on all $n$ objects the complexity is $O(n^2)$. Using this force along with Newton's second law the velocity and position can then be calculated, assuming constant acceleration in a straight line.
 \begin{align}
@@ -53,7 +59,7 @@ For a non-circular orbit like Elliptical orbits or Parabolic orbits conic sectio
 
 One of the highest effects on satellites less than 500 km away from earth is the effect of drag, it is defined as $$F_D=\frac{1}{2}\rho v^2 C_d A$$ where $A$ is the surface area normal to the direction of motion, $\rho$ is the density, $v$ is the speed, and $C_d$ is the drag coefficient. According to Moe, Moe, and Wallace 1998, the drag coefficient of a spherical satellite at around $200km$ and temperature $50K$ is about 2.123 \cite{moe_moe_wallace_1998}. Now, while the area normal to the direction of velocity can change we can make the initial estimation while the empirical extrapolation of the drag coefficient can be tweaked to overtake this error. Of course, the force of drag will be completely opposite to the direction of velocity.
 
-The comparison of thermospheric density, (Pardini \& Anselmo, 2001), concluded that below 400 km the models MSIS-86 and MSISE-90 may be considered the best but TD-88 performed at 10\% accuracy when in low solar activity \cite{pardini_anselmo_2001}. An approximation with comparable results is dubbed as the NASA model \cite{brito_celestino_moraes_2015}\cite{nasa}.
+The comparison of thermospheric density, (Pardini \& Anselmo, 2001), concluded that below 400 km the models MSIS-86 and MSISE-90 may be considered the best but TD-88 performed at 10\% accuracy when in low solar activity \cite{pardini_anselmo_2001}. An approximation with comparable results is dubbed as the NASA model \cite{brito_celestino_moraes_2015, nasa}.
 \begin{equation}
 \rho=\frac{P}{0.2869(T+27301)}
 \end{equation} where $$T=-131.21+0.00299h$$ and $$P=2.488\bigg(\frac{T+273.1}{216.6}\bigg)^{-11.388}.$$
@@ -81,10 +87,12 @@ After calculating the resulting acceleration vector using equation~\ref{eq:newto
 	\DontPrintSemicolon
 	\KwResult{System State after $n$ steps}
 	\tcc{Calculate initial conditions}
+	$m_p\leftarrow$ mass of fuel\;
+	$m_f\leftarrow$ mass of satellite without fuel\;
 	$\theta\leftarrow$ random number between $0$ and $2\pi$\;
 	$\vec{r}\leftarrow$ 300 km from the surface of earth, $\theta$ angle from x-axis\;
 	$\vec{v}\leftarrow \sqrt{\frac{GM}{r}}(\cos(\theta+\frac{\pi}{2})\hat{i}+\sin(\theta+\frac{\pi}{2})\hat{j})$ \;
-	$m\leftarrow m_p+m_l$ mass of satellite\;
+	$m\leftarrow m_p+m_l$ mass of satellite \;
 	$m_e\leftarrow$ mass of earth \;
 	$dt\leftarrow 1$ time delta per step in seconds \;
 	$G\leftarrow$ gravitational constant \;
