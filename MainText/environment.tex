@@ -31,7 +31,11 @@ Where $r_{\text{targ}}$ is the distance from the target orbit, $r_{\text{thresho
 
 Normally calculating the acceleration, the velocity and position using the 4th order yoshida integrator is computationally expensive, especially because the language, python, used is not a compiled language. This is mitigated using the Numba \cite{10.1145/2833157.2833162} library. Using Numba, the portion of the code that calculates the acceleration and calculates the 4th order yoshida integration are compiled to binary using a Just-in-time (JIT) compiler.
 	
-\section{PPO Details \& Distributed Hyper-parameter Optimization}
+\section{Hyper-parameters \& Distributed Hyper-parameter Optimization}
+
+Here, Optuna \cite{DBLP:journals/corr/abs-1907-10902} was used to optimize the PPO hyper-parameter. Optuna is a hyper-parameter optimization framework that automates the hyper-parameter search. Unfortunately, due to the large number of hyper-parameters the search space is very large and difficult to search with one machine. To mitigate this the distributed feature of Optuna was used.
+
+This Optuna feature involves creating a MySQL server which is then used by the workers to coordinate the optimization. A MySQL management service was created called OptunaExplorer to dynamically interact and manage the MySQL server as the workers optimize. A run when optimizing is called a trial and a set of trials to optimize a problem is called a study, in Optuna. The study to optimize the PPO hyper-parameters for this environment ran for 536 trials using 9 workers.
 
 \section{Training \& Evaluation}
 
