@@ -75,9 +75,20 @@ The optimized hyper-parameters include the lambda, or the GAE parameter used to 
 		$n_{\text{opteochs}}$ & 4 & Epochs to train surrogate \\\hline
 		$\epsilon$ & 0.0343517 & Clipping parameter from equation~\ref{eq:PPO_clip_objective} \\\hline
 	\end{tabularx}
-	\caption{PPO hyper-parameters used for the environment introduced.}
+	\caption{PPO hyper-parameters used for the environment introduced.}\label{table:ppo_parameters}
 \end{table}
 
 \section{Training \& Evaluation}
+
+PPO was trained for 10,000,000 steps using the parameters from Table~\ref{table:ppo_parameters} 6 times with different seeds, thereby generating 6 different training trajectories. The episode reward, the advantage, and the discounted rewards were recorded during training. For every 5000 steps the model is evaluated for 100 episodes where the average and standard deviation of the episode reward for the 100 episodes are aggregated and recorded. The training metrics are stored via TensorBoard then converted to CSV format while the model evaluation is performed via a custom callback that outputs a plot and CSV file of the accumulated data.
+
+Figure~\ref{fig:validation_runs} 
+
+\begin{figure}
+	\centering
+	\includegraphics{TestPlot}
+	\caption{Plots of the si}
+	\label{fig:validation_runs}
+\end{figure}
 
 \section{Discussion}
