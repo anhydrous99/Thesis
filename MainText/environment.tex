@@ -59,7 +59,7 @@ Here, Optuna \cite{DBLP:journals/corr/abs-1907-10902} was used to optimize the P
 
 This Optuna feature involves creating a MySQL server which is then used by the workers to coordinate the optimization. A MySQL management service was created called OptunaExplorer to dynamically interact and manage the MySQL server as the workers optimize. A run when optimizing is called a trial and a set of trials to optimize a problem is called a study, in Optuna. The study to optimize the PPO hyper-parameters for this environment ran for 536 trials using 9 workers spread evenly across 3 computers utilizing GPU acceleration.
 
-The optimized hyper-parameters include the lambda, or the GAE parameter used to control the balance between bias and variance, $\gamma$ or the discount factor from equation~\ref{eq:discountedreward}, the learning rate which is used with the Adam Optimizer used to train the algorithm, the Entropy Coefficient, $c_1$ from equation~\ref{eq:PPO_objective}, is used to prevent premature convergence, and the Clipping parameter, $\epsilon$ from equation~\ref{eq:PPO_clip_objective}. The rest of the parameters were not explicitly optimized.
+The optimized hyper-parameters include the lambda, or the GAE parameter used to control the balance between bias and variance, $\gamma$ or the discount factor from equation~\ref{eq:discountedreward}, the learning rate which is used with the Adam Optimizer used to train the algorithm, the Entropy Coefficient, $c_1$ from equation~\ref{eq:PPO_objective}, is used to prevent premature convergence, and the Clipping parameter, $\epsilon$ from equation~\ref{eq:PPO_clip_objective}. The rest of the parameters were not explicitly optimized. 
 
 \begin{table}
 	\begin{tabularx}{\columnwidth}{|c|c|X|} \hline
@@ -80,15 +80,17 @@ The optimized hyper-parameters include the lambda, or the GAE parameter used to 
 
 \section{Training \& Evaluation}
 
-PPO was trained for 10,000,000 steps using the parameters from Table~\ref{table:ppo_parameters} 6 times with different seeds, thereby generating 6 different training trajectories. The episode reward, the advantage, and the discounted rewards were recorded during training. For every 5000 steps the model is evaluated for 100 episodes where the average and standard deviation of the episode reward for the 100 episodes are aggregated and recorded. The training metrics are stored via TensorBoard then converted to CSV format while the model evaluation is performed via a custom callback that outputs a plot and CSV file of the accumulated data.
+PPO was trained for 10,000,000 steps using the parameters from Table~\ref{table:ppo_parameters} 6 times with different seeds, thereby generating 6 different training trajectories. The episode reward, the advantage, and the discounted rewards were recorded during training. For every 5000 training steps the model is evaluated for 100 episodes where the average and standard deviation of the episode reward for the 100 episodes are aggregated and recorded. The training metrics are stored via TensorBoard then converted to CSV format while the model evaluation is performed via a custom callback that outputs a plot and CSV file of the accumulated data.
 
-Figure~\ref{fig:validation_runs} 
+Figure~\ref{fig:validation_runs} shows the 6 plots, one for each run. Only one of the six runs was able to achieve average rewards above a reward of 400 while two other runs achieved runs between a reward of 300 and 400. 
 
 \begin{figure}
 	\centering
 	\includegraphics{TestPlot}
-	\caption{Plots of the si}
+	\caption{Six plot, one for each training run, showing the results of the evaluation steps.}
 	\label{fig:validation_runs}
 \end{figure}
 
 \section{Discussion}
+
+It was possible to train the PPO agent to be successful by reaching a reward of above 400 but only about 1/6th of the time. Meaning, there is still room to grow and develop an agent that is able to achieve higher reward at a more consistent rate. 

@@ -58,6 +58,26 @@ The Dot Product is defined as $$\vec{a}\cdot \vec{b}=\sum_{i=1}^n a_i b_i.$$ Not
 \end{align*}
 \end{proof}
 
+\section{Classical Algorithms}
+
+To have an overall base knowledge I'll also go over some of the more popular classic AI algorithms. These include Support Vector Machines, the Naive Bayes classifiers, Decision Trees, and K-Means algorithms.
+
+\subsection{Support Vector Machine (SVMs)}
+
+SVMs are supervised learning models that, through regression, are able to learn and classify data. There are several kinds of SVMs best of which depends on the type of data you have. For instance, if your data is linearly separable, where two classes can be separated by a hyperplane, then a Hard-margin Vanilla SVM might be best due to it's easy of implementation. 
+
+The basic premise of an SVM problem is a set of points belonging to two classes, $(\vec{x}_1, y_1),\cdots, (\vec{x}_n, y_n)$, where $y_i$ can either equal 1 or -1. A Vanilla SVM is then defined by $$\vec{w}\cdot \vec{x}-b=0,$$ Where $\vec{w}$ is a weights vector and $b$ is a bias scalar \cite{cortes_vapnik_1995}. So if the data is linearly separable, one could have margins where on one side of the margins $y=1$ and on the other side $y=-1$. On the other hand, an extension of an SVM that allows for non-linearly separable data uses the hinge loss $$\max(0, 1-y_i(\vec{w}\cdot \vec{x}_i-b)).$$ This optimization equation can then be solve via SGD, as seen in section~\ref{sec:SGD} or by reducing the problem into a quadratic programming one. 
+
+SVM have various extensions, variations, and improvements. For instance, by using what is dubbed "The Kernel Trick." This trick maps the points in higher dimensional space. For instance, if some data is not linearly separable but could be separable by a circle in 2D. By mapping these points in 3D, one could find a plane that linearly separates the points. A kernel $$k(x, x')=<\varphi(x), \varphi(x')>$$ replaces the dot product \cite{hofmann_scholkopf_smola_2008}. One of the most popular kernels is called the Radial Basis Function $$k(x, x')=\exp(-\gamma ||x-x'||^2|)$$ where $\gamma$ is a tunable hyper-parameter between 0 and 1. Unfortunately, Vanilla SVMs are fairly limited not only because of its ability to only classify linearly separable data, fixed with various tricks, but also limited by its nature as a binary classifier. The typical method of overcoming this is by combining several SVM in different forms and in concert. Several SVMs can be combined, one per class, and each classifies a specific class vs all other classes or they can be arranged in the form of a tree, made to resemble a decision tree \cite{xu_lu_zou_2015}.
+
+\subsection{Naive Bayes}
+
+The Naive Bayes classifier relies on the Bayes' theorem and is considered a probabilistic classifier. Where Bayes' theorem is defined as $$P(A|B)=\frac{P(B|A)P(A)}{P(B)}.$$
+
+\subsection{Decision Trees}
+
+\subsection{K-Means}
+
 \section{Neural Networks}
 
 The history of neural networks goes back to the 1940 but was really popularized with the perceptron in the 50s and 60s where the perceptron was implemented on an IBM 704.
@@ -181,7 +201,7 @@ Back-Propagation is a specific case of Automatic Differentiation (AD). AD is a D
 The chain rule, in calculus, is a formula to calculate the derivative of a composite function. If two functions, $f$ and $g$ are composite, that composite function is $h$, and $h$'s dependent variable is $x$ then the chain rule defined as 
 $$\frac{dh(x)}{dx}=\frac{d}{dx}(f(g(x)))=\frac{df}{dg}\bigg|_{g(x)}\cdot\frac{dg}{dx}\bigg|_{x}.$$ Forwards and Backwards accumulation of the computation graph is allowed using the chain rule. Many great tools exist to calculate this create and use these computation graphs via a GradientTape to calculate the gradient of arbitrary functions like PyTorch or Tensorflow python libraries. These library's GradientTape allows for the easy calculation of the gradient without laborious manual calculation of Back-propagation.
 
-\subsection{Stochastic Gradient Descent}
+\subsection{Stochastic Gradient Descent}\label{sec:SGD}
 
 The Stochastic Gradient Descent (SGD) is a stochastic approximation of the Gradient Descent algorithm that finds the minimum or optimizes a function. In the SGD algorithm, calculate the gradient resulting from a single randomly picked sample, then multiply it by a learning rate, hyper-parameter between 0 and 1, then add it to the weights to biases. $$\vec{w}=\vec{w}-\gamma\nabla \vec{f}(\vec{x})$$ Applying Back-propagation and SGD to Neural Networks if the mean square error is used as the loss-function. results in 
 \begin{align*}
