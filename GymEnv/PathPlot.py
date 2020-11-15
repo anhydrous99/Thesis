@@ -23,18 +23,26 @@ def main():
     obs = env.reset()
     distances = [target_distance(obs)]
     thrust = []
+    fuel = []
     episode_reward = 0
     while True:
         action, _state = model.predict(obs)
-        obs, reward, done, _ = env.step(action)
+        obs, reward, done, info = env.step(action)
         distances.append(target_distance(obs))
         thrust.append(obs[-1])
+        fuel.append(info['fuel_used'])
         episode_reward += reward
         if done:
             break
 
     plt.plot(distances)
     plt.plot(thrust)
+    plt.plot(fuel)
+    plt.title("Target distance, thrust, and fuel used per step")
+    plt.xlabel('Step')
+    plt.ylabel('Normalized value')
+    plt.legend(('Target Distance', 'Thrust', 'Used Fuel'))
+    plt.savefig('../Plots/TargetDistanceThrustUsedFuel.png')
     plt.show()
 
 

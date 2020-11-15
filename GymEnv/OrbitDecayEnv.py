@@ -101,6 +101,7 @@ class OrbitDecayEnv(gym.Env):
         self.action_space = spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.viewer = None
         self.current_step = 0
+        self.step_fuel_used = 0.0
         self.seed()
 
     def seed(self, seed=None):
@@ -152,7 +153,7 @@ class OrbitDecayEnv(gym.Env):
             done = True
 
         self.current_step += 1
-        return state, reward, done, {}
+        return state, reward, done, {'fuel_used': self.step_fuel_used / self.step_fuel}
 
     def render(self, mode='human'):
         pass
