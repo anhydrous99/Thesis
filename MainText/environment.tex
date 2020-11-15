@@ -63,7 +63,7 @@ The optimized hyper-parameters include the lambda, or the GAE parameter used to 
 
 \begin{table}
 	\begin{tabularx}{\columnwidth}{|c|c|X|} \hline
-		Hyper-parameter & Value & Description \\\hline
+		Hyper-parameter & Value & Description \\\hline\hline
 		$\gamma$ & $0.994404$ & Discount Factor\\\hline
 		$n_{\text{steps}}$ & 256 & Number of steps for each environment update. \\\hline
 		$c_1$ & 0.00377952 & Entropy Coefficient \\\hline
@@ -75,20 +75,39 @@ The optimized hyper-parameters include the lambda, or the GAE parameter used to 
 		$n_{\text{opteochs}}$ & 4 & Epochs to train surrogate \\\hline
 		$\epsilon$ & 0.0343517 & Clipping parameter from equation~\ref{eq:PPO_clip_objective} \\\hline
 	\end{tabularx}
-	\caption{PPO hyper-parameters used for the environment introduced.}\label{table:ppo_parameters}
+	\caption{The PPO hyper-parameters used for the environment introduced.}\label{table:ppo_parameters}
 \end{table}
 
 \section{Training \& Evaluation}
 
-PPO was trained for 10,000,000 steps using the parameters from Table~\ref{table:ppo_parameters} 6 times with different seeds, thereby generating 6 different training trajectories. The episode reward, the advantage, and the discounted rewards were recorded during training. For every 5000 training steps the model is evaluated for 100 episodes where the average and standard deviation of the episode reward for the 100 episodes are aggregated and recorded. The training metrics are stored via TensorBoard then converted to CSV format while the model evaluation is performed via a custom callback that outputs a plot and CSV file of the accumulated data.
+PPO was trained for 10,000,000 steps using the parameters from Table~\ref{table:ppo_parameters} 6 times with different seeds, thereby generating 6 different training trajectories. The episode reward, the advantage, and the discounted rewards were recorded during training. For every 5000 training steps the model is evaluated for 100 episodes where the average and standard deviation of the episode reward are aggregated and recorded. The training metrics are stored via TensorBoard then converted to CSV format via a custom callback that outputs a plot and CSV file of the accumulated data.
 
-Figure~\ref{fig:validation_runs} shows the 6 plots, one for each run. Only one of the six runs was able to achieve average rewards above a reward of 400 while two other runs achieved runs between a reward of 300 and 400. 
+\begin{table}
+	\centering
+	\begin{tabular}{|c|c|} \hline
+		Run & Best Model Reward \\\hline\hline
+		1 & 451.468 \\\hline
+		2 & 455.328 \\\hline
+		3 & 450.521 \\\hline
+		4 & 385.410 \\\hline
+		5 & 448.616 \\\hline
+		6 & 400.421 \\\hline
+	\end{tabular}
+	\caption{ The best model's average reward per run. This average reward is calculated over 100 episodes. }\label{table:best_evaluation_rewards}
+\end{table}
 
 \begin{figure}
 	\centering
 	\includegraphics{TestPlot}
 	\caption{Six plot, one for each training run, showing the results of the evaluation steps.}
 	\label{fig:validation_runs}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics{RewardvRunsNormalized}
+	\caption{A histogram and normal fit of the data on Table~\ref{table:best_evaluation_rewards} where the x-axis has been separated into 6 bins from the maximum reward to the minimum reward. The y-axis is the number of occurrences of said reward normalized. The fitted normal probability has $\mu=431.959$ and $\sigma=30.6914$.}
+	\label{fig:norm_hist_reward}
 \end{figure}
 
 \section{Discussion}
