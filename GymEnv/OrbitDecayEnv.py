@@ -1,3 +1,4 @@
+from stable_baselines.common.callbacks import EvalCallback, CallbackList
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common.policies import MlpPolicy
@@ -175,15 +176,19 @@ def make_venv(rank, seed=0):
 def main():
     env = SubprocVecEnv([make_venv(i) for i in range(16)])
     env_eval1 = make_env()
+    env_eval2 = make_env()
     env.seed(100)
     set_global_seeds(100)
     data_path = './training_result/'
-    while True:
-        ppo_callback = DataCallback(env_eval1, 5000, data_path + 'data.csv', data_path + 'plot.png')
-        model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path, ent_coef=0.00377952,
-                     n_steps=256, nminibatches=8, lam=0.944959, gamma=0.994404, noptepochs=4,
-                     cliprange=0.0343517, learning_rate=0.000819363)
-        model.learn(total_timesteps=10000000, callback=ppo_callback, tb_log_name='PPO2')
+    ppo_callback = DataCallback(env_eval1, 5000, data_path + 'data.csv', data_path + 'plot.png')
+    eval_callback = EvalCallback(env_eval2, best_model_save_path='./logs',
+                                 log_path='./logs/', eval_freq=5000, n_eval_episodes=100,
+                                 deterministic=True, render=False)
+    callback = CallbackList([ppo_callback, eval_callback])
+    model = PPO2(MlpPolicy, env, verbose=1, tensorboard_log=data_path, ent_coef=0.00377952,
+                 n_steps=256, nminibatches=8, lam=0.944959, gamma=0.994404, noptepochs=4,
+                 cliprange=0.0343517, learning_rate=0.000819363)
+    model.learn(total_timesteps=10000000, callback=callback, tb_log_name='PPO2')
 
 
 def test(n):
