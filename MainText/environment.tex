@@ -80,9 +80,11 @@ The optimized hyper-parameters include the lambda, or the GAE parameter used to 
 
 \section{Methodology, Training, \& Evaluation}
 
-PPO was trained for 10,000,000 steps using the parameters from Table~\ref{table:ppo_parameters} 7 times with different seeds, thereby generating 7 different training trajectories. The parameter from Table~\ref{table:ppo_parameters} were generated using distributed optimization with Optuna and OptunaExplorer. The episode reward, the advantage, and the discounted rewards were recorded during training. For every 5000 training steps the model is evaluated for 100 episodes where the average and standard deviation of the episode reward are aggregated and recorded. The 7th run's best model is saved for later evaluation. The training metrics are stored via TensorBoard then converted to CSV format via a custom callback that outputs a plot and CSV file of the accumulated data. All current and historical data and code is available though the GitHub page, \href{https://github.com/anhydrous99/Thesis}{https://github.com/anhydrous99/Thesis}.
+PPO-Clip was trained for 10,000,000 steps 7 different times with different seeds, thereby generating 7 different best models and training trajectories. The parameters from Table~\ref{table:ppo_parameters} were, as said before, generated using distributed optimization with Optuna. These parameters were used for all runs. The episode reward, the advantage, and the discounted rewards were recorded during training; these are referred to as the training metrics. For every 5000 training steps the model is evaluated using a custom callback class that runs the environment with the current model for 100 episodes it then calculates the average and standard deviation and these 100 episode's total reward. This results the generation of an average and standard deviation sample every 5000 training steps; these samples are referred to as the evaluation metrics. The 7th run's best model is then saved for later evaluation. the training metrics are recorded and stored via a TensorBoard feature of stable-baselines then converted to CSV format. The evaluation metrics, from the custom class, are recorded and stored also in a separate CSV file. All current and historical data and code is available through the GitHub page, \href{https://github.com/anhydrous99/Thesis}{https://github.com/anhydrous99/Thesis}.
 
-PPO2 from the stable-baselines library was used which is a parallel implementation of the PPO-Clip algorithm. In it's source code it is called "GPU version" due to it's parallel nature and it's improved efficiency within GPUs. The stable-baselines library is build atop Google's Tensorflow 1.x library, a popular Machine Learning library.
+PPO2 from the stable-baselines library was used which is a parallel implementation of the PPO-Clip algorithm. In it's source code it is called "GPU version" due to it's parallel nature and it's improved efficiency within GPUs. The stable-baselines library is build atop Tensorflow, a popular Machine Learning library.
+
+Figure~\ref{fig:validation_runs} shows the training plots for the first 6 out of 7 training runs. The Evaluation and Training reward for most runs stayed relatively close with the exception of plot d), which was unable to converge. As shown in plots a), b), c), e), and f), PPO was able to reach either a global or local peak then promptly degrade in reward performance. This could be due to PPO's attempt at exploration, trying to find a thrust and angle delta which works better. Only c) is able to recover and stay relatively stable afterwards. In Table~\ref{table:best_evaluation_rewards}, run 1 correlates with a), 2 with b), etc... . Table~\ref{table:best_evaluation_rewards} shows that while most of the runs are unable retain their training the best model trained evaluates to above a reward of 400 with the fitted normal probability distribution's $\mu$, shown in Figure~\ref{fig:norm_hist_reward}, evaluated at 430.411.
 
 \begin{table}
 	\centering
@@ -96,13 +98,14 @@ PPO2 from the stable-baselines library was used which is a parallel implementati
 		6 & 400.421 \\\hline
 		7 & 421.122 \\\hline
 	\end{tabular}
-	\caption{ The best model's average reward per run. This average reward is calculated over 100 episodes. }\label{table:best_evaluation_rewards}
+	\caption{The best model's average reward per run. This average reward is calculated over 100 episodes.}
+	\label{table:best_evaluation_rewards}
 \end{table}
 
 \begin{figure}
 	\centering
 	\includegraphics{TestPlot}
-	\caption{Six plots, one for each training run excluding the last run, showing the results of the evaluation steps.}
+	\caption{These 6 plot shows the first 6 run's evaluation and training reward history for the 10,000,000 steps labeled as a), b), c), d), e), and f). The blue line shows the average reward from the evaluation steps at that step, the blue area shows the standard deviation from the evaluation steps, the orange line shows the interpolated reward for the evaluation step, or ever 5000 steps. }
 	\label{fig:validation_runs}
 \end{figure}
 
