@@ -86,6 +86,10 @@ PPO2 from the stable-baselines library was used which is a parallel implementati
 
 Figure~\ref{fig:validation_runs} shows the training plots for the first 6 out of 7 training runs. The Evaluation and Training reward for most runs stayed relatively close with the exception of plot d), which was unable to converge. As shown in plots a), b), c), e), and f), PPO was able to reach either a global or local peak then promptly degrade in reward performance. This could be due to PPO's attempt at exploration, trying to find a thrust and angle delta which works better. Only c) is able to recover and stay relatively stable afterwards. In Table~\ref{table:best_evaluation_rewards}, run 1 correlates with a), 2 with b), etc... . Table~\ref{table:best_evaluation_rewards} shows that while most of the runs are unable retain their training the best model trained evaluates to above a reward of 400 with the fitted normal probability distribution's $\mu$, shown in Figure~\ref{fig:norm_hist_reward}, evaluated at 430.411.
 
+The 7th run's best model was saved and used to generate a trajectory for analyses, shown in Figure~\ref{fig:tdtuf}. The distance from the target orbit is shown in blue, since the threshold is 1 there is no need to normalize this value. The orange line in the plot is the thrust mapped to between 1 and 0. The thrust's original range is between 0 and 0.04\si{N}. The amount of fuel used is shown in the green line which is mapped to between 0 and 1 from 0 and 125. 125 stands for the number of steps where the thrust can be at max or 0.04\si{N}. The episode shown in Figure~\ref{fig:tdtuf} terminates not because of it hitting the 1\si{m} threshold distance from the target orbit, successful on this end, but because it ran out of fuel. This is shown by the green line reaching 1. As steps went by, the agent applied more thrust to counteract the accelerated orbital decay, thereby running out of fuel.
+
+Figure~\ref{fig:norm_hist_reward} shows the distribution of rewards resulting the 7 runs and a fitted normal probability distribution. This shows, along with Table~\ref{fig:validation_runs}, that most of the runs ended up in the ~450 reward bin with the possability of there being a few samples with less reward. The fitted distribution has the mean at 430.411 reward. There is, of course, not much else we can say from this figure due to low number of samples.   
+
 \begin{table}
 	\centering
 	\begin{tabular}{|c|c|} \hline
@@ -123,6 +127,6 @@ Figure~\ref{fig:validation_runs} shows the training plots for the first 6 out of
 	\label{fig:tdtuf}
 \end{figure}
 
-\section{Discussion}
+\section{Discussion \& Future Work}
 
 It was possible to train the PPO agent to be successful by reaching a reward of above 400 but only about 1/6th of the time. Meaning, there is still room to grow and develop an agent that is able to achieve higher reward at a more consistent rate. 
