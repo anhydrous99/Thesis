@@ -88,7 +88,13 @@ Figure~\ref{fig:validation_runs} shows the training plots for the first 6 out of
 
 The 7th run's best model was saved and used to generate a trajectory for analyses, shown in Figure~\ref{fig:tdtuf}. The distance from the target orbit is shown in blue, since the threshold is 1 there is no need to normalize this value. The orange line in the plot is the thrust mapped to between 1 and 0. The thrust's original range is between 0 and 0.04\si{N}. The amount of fuel used is shown in the green line which is mapped to between 0 and 1 from 0 and 125. 125 stands for the number of steps where the thrust can be at max or 0.04\si{N}. The episode shown in Figure~\ref{fig:tdtuf} terminates not because of it hitting the 1\si{m} threshold distance from the target orbit, successful on this end, but because it ran out of fuel. This is shown by the green line reaching 1. As steps went by, the agent applied more thrust to counteract the accelerated orbital decay, thereby running out of fuel.
 
-Figure~\ref{fig:norm_hist_reward} shows the distribution of rewards resulting the 7 runs and a fitted normal probability distribution. This shows, along with Table~\ref{fig:validation_runs}, that most of the runs ended up in the ~450 reward bin with the possability of there being a few samples with less reward. The fitted distribution has the mean at 430.411 reward. There is, of course, not much else we can say from this figure due to low number of samples.   
+Figure~\ref{fig:norm_hist_reward} shows the distribution of rewards resulting the 7 runs and a fitted normal probability distribution. This shows, along with Table~\ref{fig:validation_runs}, that most of the runs ended up in the ~450 reward bin with the possability of there being a few samples with less reward. The fitted distribution has the mean at 430.411 reward. There is, of course, not much else we can say from this figure due to low number of samples. 
+
+To create figure~\ref{fig:model_reward_distribution}, the 7th run's best model ran for 10,000 episodes recording the total reward for each episode. This reward was then converted into a histogram with 57 bins with rewards 100 and 650. 88 different distributions were fitted and tested for best fit via the sum of squared estimate of errors (SSE), with the folded Cauchy Probability Density Function (PDF) fitting best, 
+\begin{equation}\label{eq:cpdf}
+	f(x;c)=\frac{1}{\pi(1+(x-c)^2)}+\frac{1}{\pi(1+(x+c)^2)}.
+\end{equation} 
+Where $c$ is the shape parameters. The PDF defined in equation~\ref{eq:cpdf} lacks the location and scale information, this is added by applying a location and scale factor, $f(x+c_{\text{location}};c_{\text{shape}})\times c_{\text{scale}}$. Here $c_{\text{location}}=101.535$,$c_{\text{scale}}=49.139$, and $c_{\text{shape}}=5.858$ resulting in an SSE of $9.24\times 10^{-5}$.
 
 \begin{table}
 	\centering
@@ -127,6 +133,13 @@ Figure~\ref{fig:norm_hist_reward} shows the distribution of rewards resulting th
 	\label{fig:tdtuf}
 \end{figure}
 
+\begin{figure}
+	\centering
+	\includegraphics{ModelRewardDistribution}
+	\caption{A probability density histogram and distribution fit of 10,000 episodes from the 7th run's best model.}
+	\label{fig:model_reward_distribution}
+\end{figure}
+
 \section{Discussion \& Future Work}
 
-It was possible to train the PPO agent to be successful by reaching a reward of above 400 but only about 1/6th of the time. Meaning, there is still room to grow and develop an agent that is able to achieve higher reward at a more consistent rate. 
+It 
