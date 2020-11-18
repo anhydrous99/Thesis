@@ -96,6 +96,8 @@ To create figure~\ref{fig:model_reward_distribution}, the 7th run's best model r
 \end{equation} 
 Where $c$ is the shape parameters. The PDF defined in equation~\ref{eq:cpdf} lacks the location and scale information, this is added by applying a location and scale factor, $f(x+c_{\text{location}};c_{\text{shape}})\times c_{\text{scale}}$. Here $c_{\text{location}}=101.535$,$c_{\text{scale}}=49.139$, and $c_{\text{shape}}=5.858$ resulting in an SSE of $9.24\times 10^{-5}$.
 
+All of the optimization, plots, and data collected are for the PPO algorithm but these can also be collected for other algorithms. By collecting this information with regard to any other RL algorithm one can then compare said algorithm to the standard PPO in the standard station keeping environment created here. The first step to getting the data to compare is to use Optuna or another similar library to find optimal parameters that maximize the reward in this environment. The second step is the to train, using these parameters, several times while keeping track of the training reward and the average and standard deviation evaluation reward, for every 5000 training steps for 100 episodes. One of the models, preferable the model which produced the reward with the least difference from the average of all training runs, is then used for 10,000 episodes to produce a histogram and a distribution analysis, to answer the question, "What probability distribution does this algorithm produce?" The algorithm can then be compared to the PPO algorithm evaluated here.
+
 \begin{table}
 	\centering
 	\begin{tabular}{|c|c|} \hline
@@ -140,6 +142,10 @@ Where $c$ is the shape parameters. The PDF defined in equation~\ref{eq:cpdf} lac
 	\label{fig:model_reward_distribution}
 \end{figure}
 
-\section{Discussion \& Future Work}
+\section{Discussion}
 
-It 
+Locally optimal PPO parameters were found via Distributed Computing, with those parameters, 7 PPO agents were trained. For the first 6 of the agents their training and evaluation histories were recorded and shown, in figure~\ref{fig:validation_runs}, as well for a plot of one of the 7th agent's episodes, shown on figure~\ref{fig:tdtuf}. The 7th agent was then used for 10,000 episodes where their total reward was recorded and a histogram and plot was formed. A series of distributions were tested against the histogram where the folded Cauchy PDF was found to best fit. This PDF was also plotted on the same figure. 
+
+After going over the physics which are required for the creation of the environment, some of the building blocks of Machine Learning and Reinforcement Learning are laid specifically to go over the PPO algorithm that is evaluated in the environment created. This environment 
+
+\subsection{Future Work}
