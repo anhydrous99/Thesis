@@ -156,10 +156,16 @@ class OrbitDecayEnv(gym.Env):
         return state, reward, done, {'fuel_used': self.step_fuel_used / self.step_fuel}
 
     def render(self, mode='human'):
-        pass
+        screen_width = 600
+        screen_height = 400
+
+        world_width = self.threshold * 2
+        scale = screen_width / world_width
 
     def close(self):
-        pass
+        if self.viewer:
+            self.viewer.close()
+            self.viewer = None
 
 
 def make_env():
