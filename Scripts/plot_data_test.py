@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.interpolate
-grid = plt.GridSpec(2, 3, wspace=0.5, hspace=0.6)
+grid = plt.GridSpec(3, 2, wspace=0.2, hspace=0.25)
 
 
 def plot(path, path2, i, j, lbl='a'):
@@ -25,12 +25,15 @@ def plot(path, path2, i, j, lbl='a'):
     ax.set_xticklabels([])
 
 
+fig = plt.figure(figsize=(9, 10))
+
 plot('../Data/data.csv', '../Data/run-PPO2_1-tag-episode_reward.csv', 0, 0, 'a)')
 plot('../Data/data_1.csv', '../Data/run-PPO2_2-tag-episode_reward.csv', 0, 1, 'b)')
-plot('../Data/data_2.csv', '../Data/run-PPO2_3-tag-episode_reward.csv', 0, 2, 'c)')
-plot('../Data/data_3.csv', '../Data/run-PPO2_4-tag-episode_reward.csv', 1, 0, 'd)')
-plot('../Data/data_4.csv', '../Data/run-PPO2_5-tag-episode_reward.csv', 1, 1, 'e)')
-plot('../Data/data_5.csv', '../Data/run-PPO2_6-tag-episode_reward.csv', 1, 2, 'f)')
+plot('../Data/data_2.csv', '../Data/run-PPO2_3-tag-episode_reward.csv', 1, 0, 'c)')
+plot('../Data/data_3.csv', '../Data/run-PPO2_4-tag-episode_reward.csv', 1, 1, 'd)')
+plot('../Data/data_4.csv', '../Data/run-PPO2_5-tag-episode_reward.csv', 2, 0, 'e)')
+plot('../Data/data_5.csv', '../Data/run-PPO2_6-tag-episode_reward.csv', 2, 1, 'f)')
+
 plt.figlegend(('Evaluation', 'Training'), loc='upper left')
-plt.savefig('../Plots/TestPlot.png', bbox_inches='tight')
+#plt.savefig('../Plots/TestPlot2.png', bbox_inches='tight', pad_inches=0, transparent=True)
 plt.show()
